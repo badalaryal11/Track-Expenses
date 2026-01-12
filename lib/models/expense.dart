@@ -19,11 +19,15 @@ class Expense extends HiveObject {
   @HiveField(4)
   final String category;
 
+  @HiveField(5)
+  final String currency;
+
   Expense({
     required this.id,
     required this.title,
     required this.amount,
     required this.date,
     required this.category,
+    this.currency = 'Rs', // Default currency
   });
 }

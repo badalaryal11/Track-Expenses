@@ -47,7 +47,7 @@ class ExpenseList extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      '\$${expense.amount.toStringAsFixed(2)}',
+                      '${expense.currency} ${expense.amount.toStringAsFixed(2)}',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: Colors.red[700],

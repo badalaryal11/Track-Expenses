@@ -15,9 +15,18 @@ class AddExpenseScreen extends StatefulWidget {
 class _AddExpenseScreenState extends State<AddExpenseScreen> {
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
+  final _customCategoryController = TextEditingController();
   DateTime? _selectedDate;
   String _selectedCategory = 'Food';
+  String _selectedCurrency = 'NPR'; // Default currency
   final _categories = ['Food', 'Travel', 'Leisure', 'Work', 'Other'];
+  final _currencies = [
+    'NPR',
+    'Rs',
+    'USD',
+    'EUR',
+    'GBP',
+  ]; // NPR and Rs might be redundant, but user asked for "npr and rs"
 
   void _presentDatePicker() {
     showDatePicker(
@@ -47,12 +56,20 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       return; // Show error toast
     }
 
+    if (_selectedCategory == 'Other' &&
+        _customCategoryController.text.isEmpty) {
+      return; // Show error: user must specify category
+    }
+
     final newExpense = Expense(
       id: const Uuid().v4(),
       title: enteredTitle,
       amount: enteredAmount,
       date: _selectedDate!,
-      category: _selectedCategory,
+      category: _selectedCategory == 'Other'
+          ? _customCategoryController.text
+          : _selectedCategory,
+      currency: _selectedCurrency,
     );
 
     Provider.of<ExpenseProvider>(context, listen: false).addExpense(newExpense);
@@ -63,58 +80,151 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Add New Expense')),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextField(
-              controller: _titleController,
-              decoration: const InputDecoration(labelText: 'Title'),
-            ),
-            TextField(
-              controller: _amountController,
-              decoration: const InputDecoration(labelText: 'Amount'),
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 20),
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    _selectedDate == null
-                        ? 'No Date Chosen!'
-                        : 'Picked Date: ${DateFormat.yMd().format(_selectedDate!)}',
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Card(
+                elevation: 4,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      TextField(
+                        controller: _titleController,
+                        decoration: const InputDecoration(
+                          labelText: 'Title',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.title),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: TextField(
+                              controller: _amountController,
+                              decoration: const InputDecoration(
+                                labelText: 'Amount',
+                                border: OutlineInputBorder(),
+                                prefixIcon: Icon(Icons.attach_money),
+                              ),
+                              keyboardType: TextInputType.number,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            flex: 1,
+                            child: InputDecorator(
+                              decoration: const InputDecoration(
+                                labelText: 'Currency',
+                                border: OutlineInputBorder(),
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 5,
+                                ),
+                              ),
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton<String>(
+                                  value: _selectedCurrency,
+                                  isDense: true,
+                                  items: _currencies.map((currency) {
+                                    return DropdownMenuItem(
+                                      value: currency,
+                                      child: Text(currency),
+                                    );
+                                  }).toList(),
+                                  onChanged: (value) {
+                                    if (value == null) return;
+                                    setState(() {
+                                      _selectedCurrency = value;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      InkWell(
+                        onTap: _presentDatePicker,
+                        child: InputDecorator(
+                          decoration: const InputDecoration(
+                            labelText: 'Date',
+                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(Icons.calendar_today),
+                          ),
+                          child: Text(
+                            _selectedDate == null
+                                ? 'No Date Chosen'
+                                : DateFormat.yMd().format(_selectedDate!),
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      InputDecorator(
+                        decoration: const InputDecoration(
+                          labelText: 'Category',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.category),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: _selectedCategory,
+                            isDense: true,
+                            items: _categories.map((category) {
+                              return DropdownMenuItem(
+                                value: category,
+                                child: Text(category),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              if (value == null) return;
+                              setState(() {
+                                _selectedCategory = value;
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                      if (_selectedCategory == 'Other') ...[
+                        const SizedBox(height: 16),
+                        TextField(
+                          controller: _customCategoryController,
+                          decoration: const InputDecoration(
+                            labelText: 'Specify Category',
+                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(Icons.edit),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
-                TextButton(
-                  onPressed: _presentDatePicker,
-                  child: const Text(
-                    'Choose Date',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: _submitData,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
                   ),
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            DropdownButton<String>(
-              value: _selectedCategory,
-              items: _categories.map((category) {
-                return DropdownMenuItem(value: category, child: Text(category));
-              }).toList(),
-              onChanged: (value) {
-                if (value == null) return;
-                setState(() {
-                  _selectedCategory = value;
-                });
-              },
-            ),
-            const SizedBox(height: 30),
-            ElevatedButton(
-              onPressed: _submitData,
-              child: const Text('Add Expense'),
-            ),
-          ],
+                child: const Text(
+                  'Add Expense',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
