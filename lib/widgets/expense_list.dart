@@ -4,7 +4,10 @@ import 'package:provider/provider.dart';
 import 'package:track_expenses/providers/expense_provider.dart';
 
 class ExpenseList extends StatelessWidget {
-  const ExpenseList({super.key});
+  final ScrollPhysics? physics;
+  final bool shrinkWrap;
+
+  const ExpenseList({super.key, this.physics, this.shrinkWrap = false});
 
   @override
   Widget build(BuildContext context) {
@@ -22,6 +25,8 @@ class ExpenseList extends StatelessWidget {
         }
 
         return ListView.builder(
+          physics: physics,
+          shrinkWrap: shrinkWrap,
           itemCount: expenses.length,
           itemBuilder: (context, index) {
             final expense = expenses[index];
