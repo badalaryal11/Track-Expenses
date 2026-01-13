@@ -15,20 +15,36 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   String _selectedView = 'Daily'; // Options: Daily, Weekly, Yearly
   DateTime _selectedDate = DateTime.now();
+  String _selectedCurrency = 'Rs';
 
   @override
   Widget build(BuildContext context) {
     final expenseProvider = Provider.of<ExpenseProvider>(context);
+    final currencies = expenseProvider.uniqueCurrencies;
+
+    // Ensure selected currency is valid
+    if (currencies.isNotEmpty && !currencies.contains(_selectedCurrency)) {
+      _selectedCurrency = currencies.first;
+    } else if (currencies.isEmpty) {
+      _selectedCurrency = 'Rs';
+    }
 
     // Get stats based on selection
     double currentTotal = 0.0;
 
     if (_selectedView == 'Daily') {
-      currentTotal = expenseProvider.calculateDailyTotal();
+      currentTotal = expenseProvider.calculateDailyTotal(
+        currency: _selectedCurrency,
+      );
     } else if (_selectedView == 'Weekly') {
-      currentTotal = expenseProvider.calculateWeeklyTotal();
+      currentTotal = expenseProvider.calculateWeeklyTotal(
+        currency: _selectedCurrency,
+      );
     } else {
-      currentTotal = expenseProvider.calculateMonthlyTotal(_selectedDate);
+      currentTotal = expenseProvider.calculateMonthlyTotal(
+        _selectedDate,
+        currency: _selectedCurrency,
+      );
     }
 
     return Scaffold(
@@ -145,14 +161,40 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                // App Icon
-                                SizedBox(
-                                  height: 50,
-                                  width: 50,
-                                  child: Image.asset(
-                                    'assets/icon/app_icon.png',
-                                  ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    // App Icon
+                                    SizedBox(
+                                      height: 50,
+                                      width: 50,
+                                      child: Image.asset(
+                                        'assets/icon/app_icon.png',
+                                      ),
+                                    ),
+                                    if (currencies.isNotEmpty)
+                                      DropdownButton<String>(
+                                        value: _selectedCurrency,
+                                        underline: Container(),
+                                        icon: const Icon(Icons.arrow_drop_down),
+                                        items: currencies.map((String value) {
+                                          return DropdownMenuItem<String>(
+                                            value: value,
+                                            child: Text(value),
+                                          );
+                                        }).toList(),
+                                        onChanged: (newValue) {
+                                          if (newValue != null) {
+                                            setState(() {
+                                              _selectedCurrency = newValue;
+                                            });
+                                          }
+                                        },
+                                      ),
+                                  ],
                                 ),
+
                                 const SizedBox(height: 12),
                                 Text(
                                   '$_selectedView Spending',
@@ -162,7 +204,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  'Rs. ${currentTotal.toStringAsFixed(2)}',
+                                  '$_selectedCurrency ${currentTotal.toStringAsFixed(2)}',
                                   style: Theme.of(context)
                                       .textTheme
                                       .displayMedium
@@ -313,11 +355,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // App Icon
-                          SizedBox(
-                            height: 50,
-                            width: 50,
-                            child: Image.asset('assets/icon/app_icon.png'),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              // App Icon
+                              SizedBox(
+                                height: 50,
+                                width: 50,
+                                child: Image.asset('assets/icon/app_icon.png'),
+                              ),
+                              if (currencies.isNotEmpty)
+                                DropdownButton<String>(
+                                  value: _selectedCurrency,
+                                  underline: Container(),
+                                  icon: const Icon(Icons.arrow_drop_down),
+                                  items: currencies.map((String value) {
+                                    return DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Text(value),
+                                    );
+                                  }).toList(),
+                                  onChanged: (newValue) {
+                                    if (newValue != null) {
+                                      setState(() {
+                                        _selectedCurrency = newValue;
+                                      });
+                                    }
+                                  },
+                                ),
+                            ],
                           ),
                           const SizedBox(height: 12),
                           Text(
@@ -326,7 +392,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Rs. ${currentTotal.toStringAsFixed(2)}',
+                            '$_selectedCurrency ${currentTotal.toStringAsFixed(2)}',
                             style: Theme.of(context).textTheme.displayMedium
                                 ?.copyWith(
                                   fontWeight: FontWeight.bold,
@@ -403,7 +469,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   void _showYearlyTotalDialog(BuildContext context, ExpenseProvider provider) {
     final year = DateTime.now().year;
-    final total = provider.calculateYearlyTotal(year);
+    final total = provider.calculateYearlyTotal(
+      year,
+      currency: _selectedCurrency,
+    );
 
     showDialog(
       context: context,
@@ -411,7 +480,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         return AlertDialog(
           title: Text('Yearly Spending ($year)'),
           content: Text(
-            'Rs. ${total.toStringAsFixed(2)}',
+            '$_selectedCurrency ${total.toStringAsFixed(2)}',
             style: Theme.of(context).textTheme.displaySmall,
           ),
           actions: [

@@ -132,18 +132,30 @@ class ExpenseProvider with ChangeNotifier {
 
   // --- Total Calculation Logic ---
 
-  double calculateDailyTotal() {
+  // --- Helper for Unique Currencies ---
+  List<String> get uniqueCurrencies {
+    return _expenses.map((e) => e.currency).toSet().toList();
+  }
+
+  // --- Total Calculation Logic ---
+
+  double calculateDailyTotal({String? currency}) {
     final now = DateTime.now();
     return _expenses
         .where((e) {
-          return e.date.year == now.year &&
+          final isSameDate =
+              e.date.year == now.year &&
               e.date.month == now.month &&
               e.date.day == now.day;
+          if (currency != null) {
+            return isSameDate && e.currency == currency;
+          }
+          return isSameDate;
         })
         .fold(0.0, (sum, item) => sum + item.amount);
   }
 
-  double calculateWeeklyTotal() {
+  double calculateWeeklyTotal({String? currency}) {
     final now = DateTime.now();
     // Week starting Monday
     final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
@@ -166,27 +178,41 @@ class ExpenseProvider with ChangeNotifier {
 
     return _expenses
         .where((e) {
-          return e.date.isAfter(start.subtract(const Duration(seconds: 1))) &&
+          final isWithinWeek =
+              e.date.isAfter(start.subtract(const Duration(seconds: 1))) &&
               e.date.isBefore(end.add(const Duration(seconds: 1)));
+
+          if (currency != null) {
+            return isWithinWeek && e.currency == currency;
+          }
+          return isWithinWeek;
         })
         .fold(0.0, (sum, item) => sum + item.amount);
   }
 
-  double calculateMonthlyTotal([DateTime? date]) {
-    final targetDate = date ?? DateTime.now();
+  double calculateMonthlyTotal(DateTime targetDate, {String? currency}) {
     return _expenses
         .where((e) {
-          return e.date.year == targetDate.year &&
+          final isSameMonth =
+              e.date.year == targetDate.year &&
               e.date.month == targetDate.month;
+
+          if (currency != null) {
+            return isSameMonth && e.currency == currency;
+          }
+          return isSameMonth;
         })
         .fold(0.0, (sum, item) => sum + item.amount);
   }
 
-  double calculateYearlyTotal([int? year]) {
-    final targetYear = year ?? DateTime.now().year;
+  double calculateYearlyTotal(int targetYear, {String? currency}) {
     return _expenses
         .where((e) {
-          return e.date.year == targetYear;
+          final isSameYear = e.date.year == targetYear;
+          if (currency != null) {
+            return isSameYear && e.currency == currency;
+          }
+          return isSameYear;
         })
         .fold(0.0, (sum, item) => sum + item.amount);
   }
