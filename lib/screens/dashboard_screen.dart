@@ -69,8 +69,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
       body: LayoutBuilder(
         builder: (context, constraints) {
-          final width = constraints.maxWidth;
-          final isLandscape = width >= 600;
+          final isLandscape =
+              MediaQuery.of(context).orientation == Orientation.landscape;
 
           if (isLandscape) {
             return Row(

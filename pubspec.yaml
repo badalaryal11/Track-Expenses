@@ -42,7 +42,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   csv: ^6.0.0
   path_provider: ^2.1.5
-  share_plus: ^12.0.1
+  share_plus: ^7.2.1
 
 
 dev_dependencies:
@@ -59,6 +59,10 @@ flutter_launcher_icons:
   ios: true
   image_path: "assets/icon/app_icon.png"
   min_sdk_android: 21 # android min sdk min:16, default 21
+
+dependency_overrides:
+  path_provider_foundation: 2.3.0
+  share_plus: 7.2.1
 
 
 
