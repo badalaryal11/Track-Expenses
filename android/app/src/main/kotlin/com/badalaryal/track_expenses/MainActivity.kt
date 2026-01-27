@@ -1,4 +1,4 @@
-package com.example.track_expenses
+package com.badalaryal.track_expenses
 
 import io.flutter.embedding.android.FlutterActivity
 
