@@ -25,7 +25,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   final _categories = ['Food', 'Travel', 'Leisure', 'Work', 'Other'];
   final _currencies = [
     'NPR',
-    'Rs',
+    'RS',
     'USD',
     'EUR',
     'GBP',

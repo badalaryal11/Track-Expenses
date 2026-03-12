@@ -28,6 +28,6 @@ class Expense extends HiveObject {
     required this.amount,
     required this.date,
     required this.category,
-    this.currency = 'Rs', // Default currency
+    this.currency = 'RS', // Default currency
   });
 }

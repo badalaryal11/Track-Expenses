@@ -18,7 +18,7 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   String _selectedView = 'Daily'; // Options: Daily, Weekly, Yearly
   DateTime _selectedDate = DateTime.now();
-  String _selectedCurrency = 'Rs';
+  String _selectedCurrency = 'RS';
 
   static const _quotes = [
     'Financial freedom starts with small steps!',
@@ -92,7 +92,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (currencies.isNotEmpty && !currencies.contains(_selectedCurrency)) {
       _selectedCurrency = currencies.first;
     } else if (currencies.isEmpty) {
-      _selectedCurrency = 'Rs';
+      _selectedCurrency = 'RS';
     }
 
     // Get stats based on selection
