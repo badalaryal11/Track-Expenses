@@ -30,17 +30,16 @@ class ExpenseList extends StatelessWidget {
           itemCount: expenses.length,
           itemBuilder: (context, index) {
             final expense = expenses[index];
+            final categoryColor = _getCategoryColor(expense.category);
             return Card(
               margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
               elevation: 2,
               child: ListTile(
                 leading: CircleAvatar(
-                  backgroundColor: Theme.of(
-                    context,
-                  ).colorScheme.primary.withValues(alpha: 0.1),
+                  backgroundColor: categoryColor.withValues(alpha: 0.15),
                   child: Icon(
                     _getCategoryIcon(expense.category),
-                    color: Theme.of(context).colorScheme.primary,
+                    color: categoryColor,
                   ),
                 ),
                 title: Text(
@@ -72,6 +71,29 @@ class ExpenseList extends StatelessWidget {
         );
       },
     );
+  }
+
+  static Color getCategoryColor(String category) {
+    return _getCategoryColorStatic(category);
+  }
+
+  static Color _getCategoryColorStatic(String category) {
+    switch (category.toLowerCase()) {
+      case 'food':
+        return Colors.orange;
+      case 'travel':
+        return Colors.blue;
+      case 'leisure':
+        return Colors.purple;
+      case 'work':
+        return Colors.green;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  Color _getCategoryColor(String category) {
+    return _getCategoryColorStatic(category);
   }
 
   IconData _getCategoryIcon(String category) {
