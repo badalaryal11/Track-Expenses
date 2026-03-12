@@ -31,39 +31,67 @@ class ExpenseList extends StatelessWidget {
           itemBuilder: (context, index) {
             final expense = expenses[index];
             final categoryColor = _getCategoryColor(expense.category);
-            return Card(
-              margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-              elevation: 2,
-              child: ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: categoryColor.withValues(alpha: 0.15),
-                  child: Icon(
-                    _getCategoryIcon(expense.category),
-                    color: categoryColor,
-                  ),
+            return Dismissible(
+              key: ValueKey(expense.id),
+              direction: DismissDirection.endToStart,
+              background: Container(
+                alignment: Alignment.centerRight,
+                padding: const EdgeInsets.only(right: 24),
+                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade400,
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                title: Text(
-                  expense.title,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                subtitle: Text(DateFormat.yMMMd().format(expense.date)),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '${expense.currency} ${expense.amount.toStringAsFixed(2)}',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.red[700],
+                child: const Icon(Icons.delete_forever, color: Colors.white, size: 28),
+              ),
+              confirmDismiss: (direction) async {
+                return await showDialog<bool>(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text('Delete Expense'),
+                    content: Text(
+                      'Are you sure you want to delete "${expense.title}"?',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(ctx).pop(false),
+                        child: const Text('Cancel'),
                       ),
+                      TextButton(
+                        onPressed: () => Navigator.of(ctx).pop(true),
+                        style: TextButton.styleFrom(foregroundColor: Colors.red),
+                        child: const Text('Delete'),
+                      ),
+                    ],
+                  ),
+                ) ?? false;
+              },
+              onDismissed: (_) {
+                provider.deleteExpense(expense);
+              },
+              child: Card(
+                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                elevation: 2,
+                child: ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: categoryColor.withValues(alpha: 0.15),
+                    child: Icon(
+                      _getCategoryIcon(expense.category),
+                      color: categoryColor,
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.delete, size: 20),
-                      onPressed: () {
-                        provider.deleteExpense(expense);
-                      },
+                  ),
+                  title: Text(
+                    expense.title,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text(DateFormat.yMMMd().format(expense.date)),
+                  trailing: Text(
+                    '${expense.currency} ${expense.amount.toStringAsFixed(2)}',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.red[700],
                     ),
-                  ],
+                  ),
                 ),
               ),
             );
