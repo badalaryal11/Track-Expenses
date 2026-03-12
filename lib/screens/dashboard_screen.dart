@@ -121,17 +121,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               ButtonSegment<String>(
                                 value: 'Daily',
                                 label: Text('Daily'),
-                                icon: Icon(Icons.calendar_view_day),
                               ),
                               ButtonSegment<String>(
                                 value: 'Weekly',
                                 label: Text('Weekly'),
-                                icon: Icon(Icons.calendar_view_week),
                               ),
                               ButtonSegment<String>(
                                 value: 'Monthly',
                                 label: Text('Monthly'),
-                                icon: Icon(Icons.calendar_month),
                               ),
                             ],
                             selected: <String>{_selectedView},
@@ -332,17 +329,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ButtonSegment<String>(
                           value: 'Daily',
                           label: Text('Daily'),
-                          icon: Icon(Icons.calendar_view_day),
                         ),
                         ButtonSegment<String>(
                           value: 'Weekly',
                           label: Text('Weekly'),
-                          icon: Icon(Icons.calendar_view_week),
                         ),
                         ButtonSegment<String>(
                           value: 'Monthly',
                           label: Text('Monthly'),
-                          icon: Icon(Icons.calendar_month),
                         ),
                       ],
                       selected: <String>{_selectedView},
