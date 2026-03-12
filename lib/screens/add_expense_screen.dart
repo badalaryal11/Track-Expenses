@@ -18,6 +18,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
   final _customCategoryController = TextEditingController();
+  final _customCurrencyController = TextEditingController();
   DateTime? _selectedDate;
   String _selectedCategory = 'Food';
   String _selectedCurrency = 'NPR'; // Default currency
@@ -28,6 +29,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     'USD',
     'EUR',
     'GBP',
+    'Other',
   ];
 
   bool get _isEditing => widget.expenseToEdit != null;
@@ -40,7 +42,13 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       _titleController.text = expense.title;
       _amountController.text = expense.amount.toString();
       _selectedDate = expense.date;
-      _selectedCurrency = expense.currency;
+      // Check if currency is a standard one or custom
+      if (_currencies.contains(expense.currency)) {
+        _selectedCurrency = expense.currency;
+      } else {
+        _selectedCurrency = 'Other';
+        _customCurrencyController.text = expense.currency;
+      }
       // Check if category is a standard one or custom
       if (_categories.contains(expense.category)) {
         _selectedCategory = expense.category;
@@ -84,6 +92,15 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       return; // Show error: user must specify category
     }
 
+    if (_selectedCurrency == 'Other' &&
+        _customCurrencyController.text.trim().isEmpty) {
+      return; // Show error: user must specify currency
+    }
+
+    final currency = _selectedCurrency == 'Other'
+        ? _customCurrencyController.text.trim()
+        : _selectedCurrency;
+
     final newExpense = Expense(
       id: _isEditing ? widget.expenseToEdit!.id : const Uuid().v4(),
       title: enteredTitle,
@@ -92,7 +109,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       category: _selectedCategory == 'Other'
           ? _customCategoryController.text
           : _selectedCategory,
-      currency: _selectedCurrency,
+      currency: currency,
     );
 
     final provider = Provider.of<ExpenseProvider>(context, listen: false);
@@ -163,6 +180,22 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
         ),
       ],
     );
+
+    final customCurrencyField = _selectedCurrency == 'Other'
+        ? Padding(
+            padding: const EdgeInsets.only(top: 16),
+            child: TextField(
+              controller: _customCurrencyController,
+              decoration: const InputDecoration(
+                labelText: 'Enter Currency Code',
+                hintText: 'e.g. AUD, JPY, INR',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.currency_exchange),
+              ),
+              textCapitalization: TextCapitalization.characters,
+            ),
+          )
+        : const SizedBox.shrink();
 
     final dateField = InkWell(
       onTap: _presentDatePicker,
@@ -251,6 +284,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                               titleField,
                               const SizedBox(height: 16),
                               amountRow,
+                              customCurrencyField,
                             ],
                           ),
                         ),
@@ -294,6 +328,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                             titleField,
                             const SizedBox(height: 16),
                             amountRow,
+                            customCurrencyField,
                             const SizedBox(height: 16),
                             dateField,
                             const SizedBox(height: 16),
