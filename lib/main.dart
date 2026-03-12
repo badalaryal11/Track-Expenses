@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:track_expenses/models/expense.dart';
@@ -35,12 +36,18 @@ class MyApp extends StatelessWidget {
             seedColor: Colors.teal,
             brightness: Brightness.light,
           ),
+          textTheme: GoogleFonts.poppinsTextTheme(
+            ThemeData(brightness: Brightness.light).textTheme,
+          ),
           useMaterial3: true,
         ),
         darkTheme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
             seedColor: Colors.teal,
             brightness: Brightness.dark,
+          ),
+          textTheme: GoogleFonts.poppinsTextTheme(
+            ThemeData(brightness: Brightness.dark).textTheme,
           ),
           useMaterial3: true,
         ),
