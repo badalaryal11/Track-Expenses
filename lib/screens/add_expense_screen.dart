@@ -6,7 +6,9 @@ import 'package:track_expenses/providers/expense_provider.dart';
 import 'package:uuid/uuid.dart';
 
 class AddExpenseScreen extends StatefulWidget {
-  const AddExpenseScreen({super.key});
+  final Expense? expenseToEdit;
+
+  const AddExpenseScreen({super.key, this.expenseToEdit});
 
   @override
   State<AddExpenseScreen> createState() => _AddExpenseScreenState();
@@ -26,7 +28,28 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     'USD',
     'EUR',
     'GBP',
-  ]; // NPR and Rs might be redundant, but user asked for "npr and rs"
+  ];
+
+  bool get _isEditing => widget.expenseToEdit != null;
+
+  @override
+  void initState() {
+    super.initState();
+    final expense = widget.expenseToEdit;
+    if (expense != null) {
+      _titleController.text = expense.title;
+      _amountController.text = expense.amount.toString();
+      _selectedDate = expense.date;
+      _selectedCurrency = expense.currency;
+      // Check if category is a standard one or custom
+      if (_categories.contains(expense.category)) {
+        _selectedCategory = expense.category;
+      } else {
+        _selectedCategory = 'Other';
+        _customCategoryController.text = expense.category;
+      }
+    }
+  }
 
   void _presentDatePicker() {
     showDatePicker(
@@ -62,7 +85,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     }
 
     final newExpense = Expense(
-      id: const Uuid().v4(),
+      id: _isEditing ? widget.expenseToEdit!.id : const Uuid().v4(),
       title: enteredTitle,
       amount: enteredAmount,
       date: _selectedDate!,
@@ -72,7 +95,12 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       currency: _selectedCurrency,
     );
 
-    Provider.of<ExpenseProvider>(context, listen: false).addExpense(newExpense);
+    final provider = Provider.of<ExpenseProvider>(context, listen: false);
+    if (_isEditing) {
+      provider.updateExpense(widget.expenseToEdit!, newExpense);
+    } else {
+      provider.addExpense(newExpense);
+    }
     Navigator.of(context).pop();
   }
 
@@ -198,14 +226,14 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
       ),
-      child: const Text(
-        'Add Expense',
-        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+      child: Text(
+        _isEditing ? 'Update Expense' : 'Add Expense',
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
       ),
     );
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Add New Expense')),
+      appBar: AppBar(title: Text(_isEditing ? 'Edit Expense' : 'Add New Expense')),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16),

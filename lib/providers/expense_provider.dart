@@ -45,6 +45,15 @@ class ExpenseProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> updateExpense(Expense oldExpense, Expense updatedExpense) async {
+    await oldExpense.delete();
+    _expenses.remove(oldExpense);
+    await _expenseBox.add(updatedExpense);
+    _expenses.add(updatedExpense);
+    _sortExpenses();
+    notifyListeners();
+  }
+
   double get totalSpending {
     return _expenses.fold(0.0, (sum, item) => sum + item.amount);
   }

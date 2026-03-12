@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:track_expenses/providers/expense_provider.dart';
+import 'package:track_expenses/screens/add_expense_screen.dart';
 
 class ExpenseList extends StatelessWidget {
   final ScrollPhysics? physics;
@@ -93,6 +94,13 @@ class ExpenseList extends StatelessWidget {
                 margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                 elevation: 2,
                 child: ListTile(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => AddExpenseScreen(expenseToEdit: expense),
+                      ),
+                    );
+                  },
                   leading: CircleAvatar(
                     backgroundColor: categoryColor.withValues(alpha: 0.15),
                     child: Icon(
