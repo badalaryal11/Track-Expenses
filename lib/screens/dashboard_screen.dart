@@ -210,17 +210,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   ).textTheme.titleMedium,
                                 ),
                                 const SizedBox(height: 4),
-                                Text(
-                                  '$_selectedCurrency ${currentTotal.toStringAsFixed(2)}',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .displayMedium
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.primary,
+                                AnimatedSwitcher(
+                                  duration: const Duration(milliseconds: 400),
+                                  transitionBuilder: (child, animation) {
+                                    return FadeTransition(
+                                      opacity: animation,
+                                      child: ScaleTransition(
+                                        scale: animation,
+                                        child: child,
                                       ),
+                                    );
+                                  },
+                                  child: Text(
+                                    '$_selectedCurrency ${currentTotal.toStringAsFixed(2)}',
+                                    key: ValueKey('$_selectedView$_selectedCurrency$currentTotal'),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .displayMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.primary,
+                                        ),
+                                  ),
                                 ),
                                 const SizedBox(height: 12),
                                 Container(
@@ -400,13 +413,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             style: Theme.of(context).textTheme.titleMedium,
                           ),
                           const SizedBox(height: 4),
-                          Text(
-                            '$_selectedCurrency ${currentTotal.toStringAsFixed(2)}',
-                            style: Theme.of(context).textTheme.displayMedium
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).colorScheme.primary,
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 400),
+                            transitionBuilder: (child, animation) {
+                              return FadeTransition(
+                                opacity: animation,
+                                child: ScaleTransition(
+                                  scale: animation,
+                                  child: child,
                                 ),
+                              );
+                            },
+                            child: Text(
+                              '$_selectedCurrency ${currentTotal.toStringAsFixed(2)}',
+                              key: ValueKey('portrait_$_selectedView$_selectedCurrency$currentTotal'),
+                              style: Theme.of(context).textTheme.displayMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context).colorScheme.primary,
+                                  ),
+                            ),
                           ),
                           const SizedBox(height: 12),
                           Container(
