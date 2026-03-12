@@ -18,6 +18,24 @@ class ExpenseProvider with ChangeNotifier {
     // Determine which box to open. We'll simply use one box for now.
     _expenseBox = await Hive.openBox<Expense>('expenses');
     _expenses = _expenseBox.values.toList();
+
+    // Migrate: rename 'Rs' currency to 'RS'
+    final toMigrate = _expenses.where((e) => e.currency == 'Rs').toList();
+    for (final expense in toMigrate) {
+      final updated = Expense(
+        id: expense.id,
+        title: expense.title,
+        amount: expense.amount,
+        date: expense.date,
+        category: expense.category,
+        currency: 'RS',
+      );
+      await expense.delete();
+      _expenses.remove(expense);
+      await _expenseBox.add(updated);
+      _expenses.add(updated);
+    }
+
     _sortExpenses();
     notifyListeners();
   }
