@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:track_expenses/providers/expense_provider.dart';
 import 'package:track_expenses/screens/add_expense_screen.dart';
+import 'package:track_expenses/widgets/category_chart.dart';
 import 'package:track_expenses/widgets/expense_list.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -46,6 +47,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
         currency: _selectedCurrency,
       );
     }
+
+    final categoryTotals = expenseProvider.getCategoryTotals(
+      view: _selectedView,
+      selectedDate: _selectedDate,
+      currency: _selectedCurrency,
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -241,6 +248,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             ),
                           ),
                         ),
+                        const SizedBox(height: 12),
+                        CategoryChart(categoryTotals: categoryTotals),
                       ],
                     ),
                   ),
@@ -424,6 +433,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                     ),
                   ),
+
+                  // Category Chart
+                  CategoryChart(categoryTotals: categoryTotals),
+                  const SizedBox(height: 8),
 
                   // Recent Transactions Header
                   Padding(

@@ -217,6 +217,58 @@ class ExpenseProvider with ChangeNotifier {
         .fold(0.0, (sum, item) => sum + item.amount);
   }
 
+  /// Returns spending totals grouped by category for the given view/currency.
+  Map<String, double> getCategoryTotals({
+    required String view,
+    DateTime? selectedDate,
+    String? currency,
+  }) {
+    final now = DateTime.now();
+    final Map<String, double> totals = {};
+
+    for (var expense in _expenses) {
+      // Filter by currency
+      if (currency != null && expense.currency != currency) continue;
+
+      bool include = false;
+      if (view == 'Daily') {
+        include = expense.date.year == now.year &&
+            expense.date.month == now.month &&
+            expense.date.day == now.day;
+      } else if (view == 'Weekly') {
+        final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+        final start = DateTime(
+          startOfWeek.year,
+          startOfWeek.month,
+          startOfWeek.day,
+        );
+        final end = DateTime(
+          startOfWeek.year,
+          startOfWeek.month,
+          startOfWeek.day + 6,
+          23,
+          59,
+          59,
+        );
+        include =
+            expense.date.isAfter(start.subtract(const Duration(seconds: 1))) &&
+            expense.date.isBefore(end.add(const Duration(seconds: 1)));
+      } else if (view == 'Monthly') {
+        final target = selectedDate ?? now;
+        include =
+            expense.date.year == target.year &&
+            expense.date.month == target.month;
+      }
+
+      if (include) {
+        totals[expense.category] =
+            (totals[expense.category] ?? 0) + expense.amount;
+      }
+    }
+
+    return totals;
+  }
+
   // --- Data Export Logic ---
 
   Future<void> exportExpenses() async {
