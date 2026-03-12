@@ -1,4 +1,4 @@
-# Track Expenses
+# Paisa
 
 A comprehensive expense tracking application built with Flutter, designed to help users monitor their spending habits through various timeframes and visual insights.
 

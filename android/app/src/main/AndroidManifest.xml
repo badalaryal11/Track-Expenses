@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="track_expenses"
+        android:label="Paisa"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         <activity
