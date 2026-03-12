@@ -117,6 +117,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: SegmentedButton<String>(
+                            showSelectedIcon: false,
                             segments: const <ButtonSegment<String>>[
                               ButtonSegment<String>(
                                 value: 'Daily',
@@ -325,6 +326,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: SegmentedButton<String>(
+                      showSelectedIcon: false,
                       segments: const <ButtonSegment<String>>[
                         ButtonSegment<String>(
                           value: 'Daily',
