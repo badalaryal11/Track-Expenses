@@ -121,7 +121,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Expense'),
+        title: const Text('My Expense'),
         actions: [
           IconButton(
             onPressed: () {

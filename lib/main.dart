@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [ChangeNotifierProvider(create: (_) => ExpenseProvider())],
       child: MaterialApp(
-        title: 'Expense',
+        title: 'My Expense',
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
             seedColor: Colors.teal,
