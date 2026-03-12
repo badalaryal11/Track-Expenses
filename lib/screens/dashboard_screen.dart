@@ -42,6 +42,46 @@ class _DashboardScreenState extends State<DashboardScreen> {
     super.initState();
     _currentQuote = _quotes[Random().nextInt(_quotes.length)];
   }
+  static const _views = ['Daily', 'Weekly', 'Monthly'];
+
+  Widget _buildViewSelector() {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      ),
+      child: Row(
+        children: _views.map((view) {
+          final isSelected = _selectedView == view;
+          return Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => _selectedView = view),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: isSelected
+                      ? Theme.of(context).colorScheme.primary
+                      : Colors.transparent,
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  view,
+                  style: TextStyle(
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    color: isSelected
+                        ? Theme.of(context).colorScheme.onPrimary
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -116,29 +156,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         // View Selector
                         Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: SegmentedButton<String>(
-                            showSelectedIcon: false,
-                            segments: const <ButtonSegment<String>>[
-                              ButtonSegment<String>(
-                                value: 'Daily',
-                                label: Text('Daily'),
-                              ),
-                              ButtonSegment<String>(
-                                value: 'Weekly',
-                                label: Text('Weekly'),
-                              ),
-                              ButtonSegment<String>(
-                                value: 'Monthly',
-                                label: Text('Monthly'),
-                              ),
-                            ],
-                            selected: <String>{_selectedView},
-                            onSelectionChanged: (Set<String> newSelection) {
-                              setState(() {
-                                _selectedView = newSelection.first;
-                              });
-                            },
-                          ),
+                          child: _buildViewSelector(),
                         ),
 
                         // Month Selector (Only visible for Monthly view)
@@ -325,29 +343,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   // View Selector
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: SegmentedButton<String>(
-                      showSelectedIcon: false,
-                      segments: const <ButtonSegment<String>>[
-                        ButtonSegment<String>(
-                          value: 'Daily',
-                          label: Text('Daily'),
-                        ),
-                        ButtonSegment<String>(
-                          value: 'Weekly',
-                          label: Text('Weekly'),
-                        ),
-                        ButtonSegment<String>(
-                          value: 'Monthly',
-                          label: Text('Monthly'),
-                        ),
-                      ],
-                      selected: <String>{_selectedView},
-                      onSelectionChanged: (Set<String> newSelection) {
-                        setState(() {
-                          _selectedView = newSelection.first;
-                        });
-                      },
-                    ),
+                    child: _buildViewSelector(),
                   ),
 
                   // Month Selector (Only visible for Monthly view)
