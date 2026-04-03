@@ -12,6 +12,7 @@ class RecurringExpenseService {
     bool hasUpdates = false;
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
+    final List<Expense> newExpenses = [];
 
     for (var expense in currentExpenses) {
       if (expense.isRecurring && expense.nextRecurrenceDate != null) {
@@ -29,7 +30,7 @@ class RecurringExpenseService {
           );
           
           await repository.addExpense(newExpense);
-          currentExpenses.add(newExpense); // directly push tracking into current array so provider reflects instantly
+          newExpenses.add(newExpense);
 
           // Update the parent's nextRecurrenceDate
           DateTime nextDate = expense.nextRecurrenceDate!;
@@ -46,6 +47,7 @@ class RecurringExpenseService {
         }
       }
     }
+    currentExpenses.addAll(newExpenses);
     return hasUpdates;
   }
 }

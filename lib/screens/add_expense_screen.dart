@@ -23,7 +23,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   final _customCurrencyController = TextEditingController();
   DateTime? _selectedDate;
   String _selectedCategory = 'Food';
-  String _selectedCurrency = 'NPR'; // Default currency
+  late String _selectedCurrency;
   String _recurrenceInterval = 'None'; 
 
   bool get _isEditing => widget.expenseToEdit != null;
@@ -31,6 +31,16 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   @override
   void initState() {
     super.initState();
+    // Set default currency from provider (available synchronously after init)
+    final provider = Provider.of<ExpenseProvider>(context, listen: false);
+    final defaultCur = provider.defaultCurrency;
+    if (AppConstants.currencies.contains(defaultCur)) {
+      _selectedCurrency = defaultCur;
+    } else {
+      _selectedCurrency = 'Other';
+      _customCurrencyController.text = defaultCur;
+    }
+
     final expense = widget.expenseToEdit;
     if (expense != null) {
       _titleController.text = expense.title;

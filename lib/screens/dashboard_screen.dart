@@ -24,7 +24,7 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   String _selectedView = 'Daily'; // Options: Daily, Weekly, Monthly
   DateTime _selectedDate = DateTime.now();
-  String _selectedCurrency = 'RS';
+  String? _selectedCurrency;
   late final String _currentQuote;
 
   @override
@@ -38,48 +38,53 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final expenseProvider = Provider.of<ExpenseProvider>(context);
     final currencies = expenseProvider.uniqueCurrencies;
 
+    // Initialize selected currency from saved default on first build
+    _selectedCurrency ??= expenseProvider.defaultCurrency;
+
     // Ensure selected currency is valid
     if (currencies.isNotEmpty && !currencies.contains(_selectedCurrency)) {
       _selectedCurrency = currencies.first;
     } else if (currencies.isEmpty) {
-      _selectedCurrency = 'RS';
+      _selectedCurrency = expenseProvider.defaultCurrency;
     }
+
+    final String currency = _selectedCurrency!;
 
     // Get stats based on selection
     double currentTotal = 0.0;
     if (_selectedView == 'Daily') {
       currentTotal = expenseProvider.calculateDailyTotal(
-        currency: _selectedCurrency,
+        currency: currency,
       );
     } else if (_selectedView == 'Weekly') {
       currentTotal = expenseProvider.calculateWeeklyTotal(
-        currency: _selectedCurrency,
+        currency: currency,
       );
     } else {
       currentTotal = expenseProvider.calculateMonthlyTotal(
         _selectedDate,
-        currency: _selectedCurrency,
+        currency: currency,
       );
     }
 
     final categoryTotals = expenseProvider.getCategoryTotals(
       view: _selectedView,
       selectedDate: _selectedDate,
-      currency: _selectedCurrency,
+      currency: currency,
     );
 
     Map<int, double> dailySpendingMonth = {};
     if (_selectedView == 'Monthly') {
       dailySpendingMonth = expenseProvider.getDailySpendingForMonth(
         _selectedDate,
-        currency: _selectedCurrency,
+        currency: currency,
       );
     }
 
     Map<int, double> dailySpendingWeek = {};
     if (_selectedView == 'Weekly') {
       dailySpendingWeek = expenseProvider.getDailyStats(
-        currency: _selectedCurrency,
+        currency: currency,
       );
     }
 
@@ -106,6 +111,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
               expenseProvider.exportExpenses();
             },
             icon: const Icon(Icons.download),
+          ),
+          IconButton(
+            onPressed: () {
+              _showDefaultCurrencyDialog(context, expenseProvider);
+            },
+            icon: const Icon(Icons.settings),
+            tooltip: 'Settings',
           ),
         ],
       ),
@@ -141,8 +153,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         // Summary Card
                         SummaryCard(
                           currencies: currencies,
-                          selectedCurrency: _selectedCurrency,
-                          onCurrencyChanged: (currency) => setState(() => _selectedCurrency = currency),
+                          selectedCurrency: currency,
+                          onCurrencyChanged: (c) => setState(() => _selectedCurrency = c),
                           selectedView: _selectedView,
                           currentTotal: currentTotal,
                           currentQuote: _currentQuote,
@@ -214,8 +226,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   // Summary Card
                   SummaryCard(
                     currencies: currencies,
-                    selectedCurrency: _selectedCurrency,
-                    onCurrencyChanged: (currency) => setState(() => _selectedCurrency = currency),
+                    selectedCurrency: currency,
+                    onCurrencyChanged: (c) => setState(() => _selectedCurrency = c),
                     selectedView: _selectedView,
                     currentTotal: currentTotal,
                     currentQuote: _currentQuote,
@@ -278,9 +290,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   void _showYearlyTotalDialog(BuildContext context, ExpenseProvider provider) {
     final year = DateTime.now().year;
+    final cur = _selectedCurrency ?? provider.defaultCurrency;
     final total = provider.calculateYearlyTotal(
       year,
-      currency: _selectedCurrency,
+      currency: cur,
     );
 
     showDialog(
@@ -289,7 +302,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         return AlertDialog(
           title: Text('Yearly Spending ($year)'),
           content: Text(
-            '$_selectedCurrency ${total.toStringAsFixed(2)}',
+            '$cur ${total.toStringAsFixed(2)}',
             style: Theme.of(context).textTheme.displaySmall,
           ),
           actions: [
@@ -300,6 +313,105 @@ class _DashboardScreenState extends State<DashboardScreen> {
               child: const Text('Close'),
             ),
           ],
+        );
+      },
+    );
+  }
+
+  void _showDefaultCurrencyDialog(BuildContext context, ExpenseProvider provider) {
+    final allCurrencies = AppConstants.currencies; // includes 'Other'
+    final customController = TextEditingController();
+    
+    // Determine initial state
+    final standardCurrencies = allCurrencies.where((c) => c != 'Other').toList();
+    String selected;
+    if (standardCurrencies.contains(provider.defaultCurrency)) {
+      selected = provider.defaultCurrency;
+    } else {
+      selected = 'Other';
+      customController.text = provider.defaultCurrency;
+    }
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text('Default Currency'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Choose the currency used by default when adding new expenses.',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    const SizedBox(height: 16),
+                    RadioGroup<String>(
+                      groupValue: selected,
+                      onChanged: (val) {
+                        if (val != null) {
+                          setDialogState(() => selected = val);
+                        }
+                      },
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ...allCurrencies.map((c) => RadioListTile<String>(
+                            title: Text(c),
+                            value: c,
+                          )),
+                        ],
+                      ),
+                    ),
+                    if (selected == 'Other')
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8, left: 16, right: 16),
+                        child: TextField(
+                          controller: customController,
+                          textCapitalization: TextCapitalization.characters,
+                          decoration: const InputDecoration(
+                            labelText: 'Enter Currency Code',
+                            hintText: 'e.g. AUD, JPY, INR',
+                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(Icons.currency_exchange),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  onPressed: () {
+                    final currency = selected == 'Other'
+                        ? customController.text.trim().toUpperCase()
+                        : selected;
+
+                    if (currency.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Please enter a currency code')),
+                      );
+                      return;
+                    }
+
+                    provider.setDefaultCurrency(currency);
+                    setState(() => _selectedCurrency = currency);
+                    Navigator.of(ctx).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Default currency set to $currency')),
+                    );
+                  },
+                  child: const Text('Save'),
+                ),
+              ],
+            );
+          },
         );
       },
     );

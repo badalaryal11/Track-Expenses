@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:hive/hive.dart';
 import 'package:track_expenses/models/expense.dart';
 import 'package:track_expenses/repositories/expense_repository.dart';
 import 'package:track_expenses/services/export_service.dart';
@@ -9,9 +10,15 @@ class ExpenseProvider with ChangeNotifier {
   late final RecurringExpenseService _recurringService;
   late final ExportService _exportService;
 
+  static const _settingsBoxName = 'settings';
+  static const _defaultCurrencyKey = 'defaultCurrency';
+  static const _fallbackCurrency = 'NPR';
+
   List<Expense> _expenses = [];
+  String _defaultCurrency = _fallbackCurrency;
 
   List<Expense> get expenses => _expenses;
+  String get defaultCurrency => _defaultCurrency;
 
   ExpenseProvider() {
     _recurringService = RecurringExpenseService(_repository);
@@ -22,11 +29,22 @@ class ExpenseProvider with ChangeNotifier {
     await _repository.init();
     _expenses = _repository.getAllExpenses();
 
+    // Load saved default currency
+    final settingsBox = await Hive.openBox(_settingsBoxName);
+    _defaultCurrency = settingsBox.get(_defaultCurrencyKey, defaultValue: _fallbackCurrency);
+
     _sortExpenses();
     bool hasUpdates = await _recurringService.processRecurringExpenses(_expenses);
     if (hasUpdates) {
       _sortExpenses();
     }
+    notifyListeners();
+  }
+
+  Future<void> setDefaultCurrency(String currency) async {
+    _defaultCurrency = currency;
+    final settingsBox = await Hive.openBox(_settingsBoxName);
+    await settingsBox.put(_defaultCurrencyKey, currency);
     notifyListeners();
   }
 
