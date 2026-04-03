@@ -1,11 +1,14 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:track_expenses/constants/app_constants.dart';
 import 'package:track_expenses/providers/expense_provider.dart';
 import 'package:track_expenses/screens/add_expense_screen.dart';
 import 'package:track_expenses/widgets/category_chart.dart';
+import 'package:track_expenses/widgets/dashboard/month_selector.dart';
+import 'package:track_expenses/widgets/dashboard/summary_card.dart';
+import 'package:track_expenses/widgets/dashboard/view_selector.dart';
 import 'package:track_expenses/widgets/expense_list.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -16,71 +19,15 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  String _selectedView = 'Daily'; // Options: Daily, Weekly, Yearly
+  String _selectedView = 'Daily'; // Options: Daily, Weekly, Monthly
   DateTime _selectedDate = DateTime.now();
   String _selectedCurrency = 'RS';
-
-  static const _quotes = [
-    'Financial freedom starts with small steps!',
-    'A penny saved is a penny earned.',
-    'Track today, thrive tomorrow.',
-    'Every expense tracked is a step toward control.',
-    'Budgeting isn\'t about limiting — it\'s about freedom.',
-    'Small leaks sink great ships. Track everything!',
-    'Know where your money goes, and make it work for you.',
-    'The habit of saving is itself an education.',
-    'Don\'t save what is left after spending — spend what is left after saving.',
-    'Financial awareness is the first step to wealth.',
-    'Your future self will thank you for tracking today.',
-    'Wealth is not about having a lot — it\'s about managing wisely.',
-  ];
-
   late final String _currentQuote;
 
   @override
   void initState() {
     super.initState();
-    _currentQuote = _quotes[Random().nextInt(_quotes.length)];
-  }
-  static const _views = ['Daily', 'Weekly', 'Monthly'];
-
-  Widget _buildViewSelector() {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-      ),
-      child: Row(
-        children: _views.map((view) {
-          final isSelected = _selectedView == view;
-          return Expanded(
-            child: GestureDetector(
-              onTap: () => setState(() => _selectedView = view),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.primary
-                      : Colors.transparent,
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  view,
-                  style: TextStyle(
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                    color: isSelected
-                        ? Theme.of(context).colorScheme.onPrimary
-                        : Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
-            ),
-          );
-        }).toList(),
-      ),
-    );
+    _currentQuote = AppConstants.quotes[Random().nextInt(AppConstants.quotes.length)];
   }
 
   @override
@@ -97,7 +44,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     // Get stats based on selection
     double currentTotal = 0.0;
-
     if (_selectedView == 'Daily') {
       currentTotal = expenseProvider.calculateDailyTotal(
         currency: _selectedCurrency,
@@ -138,11 +84,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ],
       ),
-
       body: LayoutBuilder(
         builder: (context, constraints) {
-          final isLandscape =
-              MediaQuery.of(context).orientation == Orientation.landscape;
+          final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
 
           if (isLandscape) {
             return Row(
@@ -156,152 +100,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         // View Selector
                         Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: _buildViewSelector(),
+                          child: ViewSelector(
+                            selectedView: _selectedView,
+                            onViewChanged: (view) => setState(() => _selectedView = view),
+                          ),
                         ),
 
                         // Month Selector (Only visible for Monthly view)
                         if (_selectedView == 'Monthly')
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.chevron_left),
-                                  onPressed: () {
-                                    setState(() {
-                                      _selectedDate = DateTime(
-                                        _selectedDate.year,
-                                        _selectedDate.month - 1,
-                                      );
-                                    });
-                                  },
-                                ),
-                                Text(
-                                  DateFormat('MMMM yyyy').format(_selectedDate),
-                                  style: Theme.of(
-                                    context,
-                                  ).textTheme.titleMedium,
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.chevron_right),
-                                  onPressed: () {
-                                    setState(() {
-                                      _selectedDate = DateTime(
-                                        _selectedDate.year,
-                                        _selectedDate.month + 1,
-                                      );
-                                    });
-                                  },
-                                ),
-                              ],
-                            ),
+                          MonthSelector(
+                            selectedDate: _selectedDate,
+                            onDateChanged: (date) => setState(() => _selectedDate = date),
                           ),
 
-                        // Summary Card (Updated with Graph)
-                        Card(
-                          margin: const EdgeInsets.all(16),
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.surfaceContainerHighest,
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    // App Icon
-                                    SizedBox(
-                                      height: 50,
-                                      width: 50,
-                                      child: Image.asset(
-                                        'assets/icon/app_icon.png',
-                                      ),
-                                    ),
-                                    if (currencies.isNotEmpty)
-                                      DropdownButton<String>(
-                                        value: _selectedCurrency,
-                                        underline: Container(),
-                                        icon: const Icon(Icons.arrow_drop_down),
-                                        items: currencies.map((String value) {
-                                          return DropdownMenuItem<String>(
-                                            value: value,
-                                            child: Text(value),
-                                          );
-                                        }).toList(),
-                                        onChanged: (newValue) {
-                                          if (newValue != null) {
-                                            setState(() {
-                                              _selectedCurrency = newValue;
-                                            });
-                                          }
-                                        },
-                                      ),
-                                  ],
-                                ),
-
-                                const SizedBox(height: 12),
-                                Text(
-                                  '$_selectedView Spending',
-                                  style: Theme.of(
-                                    context,
-                                  ).textTheme.titleMedium,
-                                ),
-                                const SizedBox(height: 4),
-                                AnimatedSwitcher(
-                                  duration: const Duration(milliseconds: 400),
-                                  transitionBuilder: (child, animation) {
-                                    return FadeTransition(
-                                      opacity: animation,
-                                      child: ScaleTransition(
-                                        scale: animation,
-                                        child: child,
-                                      ),
-                                    );
-                                  },
-                                  child: Text(
-                                    '$_selectedCurrency ${currentTotal.toStringAsFixed(2)}',
-                                    key: ValueKey('$_selectedView$_selectedCurrency$currentTotal'),
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .displayMedium
-                                        ?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.primary,
-                                        ),
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                                Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context).colorScheme.surface
-                                        .withValues(alpha: 0.5),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Text(
-                                    _currentQuote,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.copyWith(
-                                          fontStyle: FontStyle.italic,
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.secondary,
-                                        ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                        // Summary Card
+                        SummaryCard(
+                          currencies: currencies,
+                          selectedCurrency: _selectedCurrency,
+                          onCurrencyChanged: (currency) => setState(() => _selectedCurrency = currency),
+                          selectedView: _selectedView,
+                          currentTotal: currentTotal,
+                          currentQuote: _currentQuote,
+                          isPortrait: false,
                         ),
+
                         const SizedBox(height: 12),
                         CategoryChart(categoryTotals: categoryTotals),
                       ],
@@ -343,138 +165,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   // View Selector
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: _buildViewSelector(),
+                    child: ViewSelector(
+                      selectedView: _selectedView,
+                      onViewChanged: (view) => setState(() => _selectedView = view),
+                    ),
                   ),
 
                   // Month Selector (Only visible for Monthly view)
                   if (_selectedView == 'Monthly')
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.chevron_left),
-                            onPressed: () {
-                              setState(() {
-                                _selectedDate = DateTime(
-                                  _selectedDate.year,
-                                  _selectedDate.month - 1,
-                                );
-                              });
-                            },
-                          ),
-                          Text(
-                            DateFormat('MMMM yyyy').format(_selectedDate),
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.chevron_right),
-                            onPressed: () {
-                              setState(() {
-                                _selectedDate = DateTime(
-                                  _selectedDate.year,
-                                  _selectedDate.month + 1,
-                                );
-                              });
-                            },
-                          ),
-                        ],
-                      ),
+                    MonthSelector(
+                      selectedDate: _selectedDate,
+                      onDateChanged: (date) => setState(() => _selectedDate = date),
                     ),
 
-                  // Summary Card (Updated with Graph)
-                  Card(
-                    margin: const EdgeInsets.all(16),
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.surfaceContainerHighest,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              // App Icon
-                              SizedBox(
-                                height: 50,
-                                width: 50,
-                                child: Image.asset('assets/icon/app_icon.png'),
-                              ),
-                              if (currencies.isNotEmpty)
-                                DropdownButton<String>(
-                                  value: _selectedCurrency,
-                                  underline: Container(),
-                                  icon: const Icon(Icons.arrow_drop_down),
-                                  items: currencies.map((String value) {
-                                    return DropdownMenuItem<String>(
-                                      value: value,
-                                      child: Text(value),
-                                    );
-                                  }).toList(),
-                                  onChanged: (newValue) {
-                                    if (newValue != null) {
-                                      setState(() {
-                                        _selectedCurrency = newValue;
-                                      });
-                                    }
-                                  },
-                                ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            '$_selectedView Spending',
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                          const SizedBox(height: 4),
-                          AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 400),
-                            transitionBuilder: (child, animation) {
-                              return FadeTransition(
-                                opacity: animation,
-                                child: ScaleTransition(
-                                  scale: animation,
-                                  child: child,
-                                ),
-                              );
-                            },
-                            child: Text(
-                              '$_selectedCurrency ${currentTotal.toStringAsFixed(2)}',
-                              key: ValueKey('portrait_$_selectedView$_selectedCurrency$currentTotal'),
-                              style: Theme.of(context).textTheme.displayMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: Theme.of(context).colorScheme.primary,
-                                  ),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.surface.withValues(alpha: 0.5),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              _currentQuote,
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(
-                                    fontStyle: FontStyle.italic,
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.secondary,
-                                  ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                  // Summary Card
+                  SummaryCard(
+                    currencies: currencies,
+                    selectedCurrency: _selectedCurrency,
+                    onCurrencyChanged: (currency) => setState(() => _selectedCurrency = currency),
+                    selectedView: _selectedView,
+                    currentTotal: currentTotal,
+                    currentQuote: _currentQuote,
+                    isPortrait: true,
                   ),
 
                   // Category Chart

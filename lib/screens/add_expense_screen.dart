@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:track_expenses/models/expense.dart';
 import 'package:track_expenses/providers/expense_provider.dart';
 import 'package:uuid/uuid.dart';
+import 'package:track_expenses/constants/app_constants.dart';
 
 class AddExpenseScreen extends StatefulWidget {
   final Expense? expenseToEdit;
@@ -22,15 +23,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   DateTime? _selectedDate;
   String _selectedCategory = 'Food';
   String _selectedCurrency = 'NPR'; // Default currency
-  final _categories = ['Food', 'Travel', 'Leisure', 'Work', 'Other'];
-  final _currencies = [
-    'NPR',
-    'RS',
-    'USD',
-    'EUR',
-    'GBP',
-    'Other',
-  ];
 
   bool get _isEditing => widget.expenseToEdit != null;
 
@@ -43,14 +35,14 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       _amountController.text = expense.amount.toString();
       _selectedDate = expense.date;
       // Check if currency is a standard one or custom
-      if (_currencies.contains(expense.currency)) {
+      if (AppConstants.currencies.contains(expense.currency)) {
         _selectedCurrency = expense.currency;
       } else {
         _selectedCurrency = 'Other';
         _customCurrencyController.text = expense.currency;
       }
       // Check if category is a standard one or custom
-      if (_categories.contains(expense.category)) {
+      if (AppConstants.expenseCategories.contains(expense.category)) {
         _selectedCategory = expense.category;
       } else {
         _selectedCategory = 'Other';
@@ -162,7 +154,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               child: DropdownButton<String>(
                 value: _selectedCurrency,
                 isDense: true,
-                items: _currencies.map((currency) {
+                items: AppConstants.currencies.map((currency) {
                   return DropdownMenuItem(
                     value: currency,
                     child: Text(currency),
@@ -224,7 +216,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
         child: DropdownButton<String>(
           value: _selectedCategory,
           isDense: true,
-          items: _categories.map((category) {
+          items: AppConstants.expenseCategories.map((category) {
             return DropdownMenuItem(value: category, child: Text(category));
           }).toList(),
           onChanged: (value) {
