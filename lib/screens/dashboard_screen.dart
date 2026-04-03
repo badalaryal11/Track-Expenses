@@ -114,7 +114,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           IconButton(
             onPressed: () {
-              _showDefaultCurrencyDialog(context, expenseProvider);
+              _showSettingsSheet(context, expenseProvider);
             },
             icon: const Icon(Icons.settings),
             tooltip: 'Settings',
@@ -412,6 +412,104 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ],
             );
           },
+        );
+      },
+    );
+  }
+
+  void _showSettingsSheet(BuildContext context, ExpenseProvider provider) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                Text(
+                  'Settings',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ListTile(
+                  leading: const Icon(Icons.currency_exchange),
+                  title: const Text('Default Currency'),
+                  subtitle: Text('Currently: ${provider.defaultCurrency}'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.of(ctx).pop();
+                    _showDefaultCurrencyDialog(context, provider);
+                  },
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: Icon(Icons.delete_forever, color: Colors.red.shade400),
+                  title: Text(
+                    'Clear All Data',
+                    style: TextStyle(color: Colors.red.shade400),
+                  ),
+                  subtitle: const Text('Delete all expenses and reset settings'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.of(ctx).pop();
+                    _showClearDataDialog(context, provider);
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showClearDataDialog(BuildContext context, ExpenseProvider provider) {
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          icon: Icon(Icons.warning_amber_rounded, color: Colors.red.shade400, size: 48),
+          title: const Text('Clear All Data?'),
+          content: const Text(
+            'This will permanently delete all your expenses and reset your settings. This action cannot be undone.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: Colors.red.shade400,
+              ),
+              onPressed: () async {
+                await provider.clearAllData();
+                setState(() => _selectedCurrency = null);
+                if (ctx.mounted) Navigator.of(ctx).pop();
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('All data has been cleared')),
+                  );
+                }
+              },
+              child: const Text('Delete Everything'),
+            ),
+          ],
         );
       },
     );

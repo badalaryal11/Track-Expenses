@@ -57,4 +57,9 @@ class ExpenseRepository {
   Future<void> saveExpense(Expense expense) async {
     await expense.save();
   }
+
+  /// Clears all expenses from the database.
+  Future<void> clearAll() async {
+    await _expenseBox.clear();
+  }
 }

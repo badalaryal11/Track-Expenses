@@ -48,6 +48,16 @@ class ExpenseProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  /// Clears all expense data and resets settings.
+  Future<void> clearAllData() async {
+    await _repository.clearAll();
+    _expenses.clear();
+    _defaultCurrency = _fallbackCurrency;
+    final settingsBox = await Hive.openBox(_settingsBoxName);
+    await settingsBox.clear();
+    notifyListeners();
+  }
+
   void _sortExpenses() {
     _expenses.sort((a, b) => b.date.compareTo(a.date));
   }
