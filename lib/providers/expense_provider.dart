@@ -1,42 +1,32 @@
-import 'dart:io';
-
-import 'package:csv/csv.dart';
 import 'package:flutter/foundation.dart';
-import 'package:hive/hive.dart';
-import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:track_expenses/models/expense.dart';
+import 'package:track_expenses/repositories/expense_repository.dart';
+import 'package:track_expenses/services/export_service.dart';
+import 'package:track_expenses/services/recurring_expense_service.dart';
 
 class ExpenseProvider with ChangeNotifier {
-  late Box<Expense> _expenseBox;
+  final ExpenseRepository _repository = ExpenseRepository();
+  late final RecurringExpenseService _recurringService;
+  late final ExportService _exportService;
+
   List<Expense> _expenses = [];
 
   List<Expense> get expenses => _expenses;
 
-  Future<void> init() async {
-    // Determine which box to open. We'll simply use one box for now.
-    _expenseBox = await Hive.openBox<Expense>('expenses');
-    _expenses = _expenseBox.values.toList();
+  ExpenseProvider() {
+    _recurringService = RecurringExpenseService(_repository);
+    _exportService = ExportService();
+  }
 
-    // Migrate: rename 'Rs' currency to 'RS'
-    final toMigrate = _expenses.where((e) => e.currency == 'Rs').toList();
-    for (final expense in toMigrate) {
-      final updated = Expense(
-        id: expense.id,
-        title: expense.title,
-        amount: expense.amount,
-        date: expense.date,
-        category: expense.category,
-        currency: 'RS',
-      );
-      await expense.delete();
-      _expenses.remove(expense);
-      await _expenseBox.add(updated);
-      _expenses.add(updated);
-    }
+  Future<void> init() async {
+    await _repository.init();
+    _expenses = _repository.getAllExpenses();
 
     _sortExpenses();
+    bool hasUpdates = await _recurringService.processRecurringExpenses(_expenses);
+    if (hasUpdates) {
+      _sortExpenses();
+    }
     notifyListeners();
   }
 
@@ -45,28 +35,22 @@ class ExpenseProvider with ChangeNotifier {
   }
 
   Future<void> addExpense(Expense expense) async {
-    // Use the expense.id as key if you want stable keys,
-    // or let Hive auto-increment.
-    // Since we have an ID in the model, let's just add it.
-    // Hive.add() returns an int key.
-    // We can also use put(key, value).
-    await _expenseBox.add(expense);
+    await _repository.addExpense(expense);
     _expenses.add(expense);
     _sortExpenses();
     notifyListeners();
   }
 
   Future<void> deleteExpense(Expense expense) async {
-    await expense
-        .delete(); // Deletes from the box using the key stored in the HiveObject
+    await _repository.deleteExpense(expense);
     _expenses.remove(expense);
     notifyListeners();
   }
 
   Future<void> updateExpense(Expense oldExpense, Expense updatedExpense) async {
-    await oldExpense.delete();
+    await _repository.deleteExpense(oldExpense);
     _expenses.remove(oldExpense);
-    await _expenseBox.add(updatedExpense);
+    await _repository.addExpense(updatedExpense);
     _expenses.add(updatedExpense);
     _sortExpenses();
     notifyListeners();
@@ -79,7 +63,6 @@ class ExpenseProvider with ChangeNotifier {
   // --- Aggregation Logic ---
 
   // Daily Stats: Last 7 days (or current week).
-  // Let's implement reasonable "Daily" statistics:
   // Map of <WeekDay Index (1-7), Total Amount> for the current week.
   Map<int, double> getDailyStats({String? currency}) {
     final now = DateTime.now();
@@ -113,7 +96,6 @@ class ExpenseProvider with ChangeNotifier {
     for (var expense in _expenses) {
       if (expense.date.month == now.month && expense.date.year == now.year) {
         // Calculate week number within the month roughly
-        // Week 1: Days 1-7, Week 2: 8-14, etc.
         int weekNum = ((expense.date.day - 1) / 7).floor() + 1;
         stats[weekNum] = (stats[weekNum] ?? 0) + expense.amount;
       }
@@ -320,32 +302,6 @@ class ExpenseProvider with ChangeNotifier {
   // --- Data Export Logic ---
 
   Future<void> exportExpenses() async {
-    List<List<dynamic>> rows = [];
-
-    // Add Header
-    rows.add(["Date", "Title", "Amount", "Category", "Currency"]);
-
-    // Add Data
-    for (var expense in _expenses) {
-      rows.add([
-        DateFormat('yyyy-MM-dd').format(expense.date),
-        expense.title,
-        expense.amount,
-        expense.category,
-        expense.currency,
-      ]);
-    }
-
-    String csvData = const ListToCsvConverter().convert(rows);
-
-    final directory = await getTemporaryDirectory();
-    final path = "${directory.path}/expenses_export.csv";
-    final file = File(path);
-    await file.writeAsString(csvData);
-
-    // ignore: deprecated_member_use
-    await Share.shareXFiles([
-      XFile(path),
-    ], text: 'Here is your expense report.');
+    await _exportService.exportExpenses(_expenses);
   }
 }

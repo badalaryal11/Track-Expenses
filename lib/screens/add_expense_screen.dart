@@ -5,6 +5,7 @@ import 'package:track_expenses/models/expense.dart';
 import 'package:track_expenses/providers/expense_provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:track_expenses/constants/app_constants.dart';
+import 'package:track_expenses/widgets/forms/custom_dropdown_field.dart';
 
 class AddExpenseScreen extends StatefulWidget {
   final Expense? expenseToEdit;
@@ -23,6 +24,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   DateTime? _selectedDate;
   String _selectedCategory = 'Food';
   String _selectedCurrency = 'NPR'; // Default currency
+  String _recurrenceInterval = 'None'; 
 
   bool get _isEditing => widget.expenseToEdit != null;
 
@@ -48,6 +50,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
         _selectedCategory = 'Other';
         _customCategoryController.text = expense.category;
       }
+      _recurrenceInterval = expense.recurrenceInterval;
     }
   }
 
@@ -93,6 +96,23 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
         ? _customCurrencyController.text.trim()
         : _selectedCurrency;
 
+    final isRecurring = _recurrenceInterval != 'None';
+    DateTime? nextRecurrenceDate;
+    if (isRecurring && !(_isEditing && widget.expenseToEdit!.isRecurring)) {
+       if (_recurrenceInterval == 'Daily') nextRecurrenceDate = _selectedDate!.add(const Duration(days: 1));
+       if (_recurrenceInterval == 'Weekly') nextRecurrenceDate = _selectedDate!.add(const Duration(days: 7));
+       if (_recurrenceInterval == 'Monthly') nextRecurrenceDate = DateTime(_selectedDate!.year, _selectedDate!.month + 1, _selectedDate!.day);
+       if (_recurrenceInterval == 'Yearly') nextRecurrenceDate = DateTime(_selectedDate!.year + 1, _selectedDate!.month, _selectedDate!.day);
+    } else if (_isEditing && isRecurring) {
+       nextRecurrenceDate = widget.expenseToEdit?.nextRecurrenceDate;
+       if (nextRecurrenceDate == null) {
+         if (_recurrenceInterval == 'Daily') nextRecurrenceDate = _selectedDate!.add(const Duration(days: 1));
+         if (_recurrenceInterval == 'Weekly') nextRecurrenceDate = _selectedDate!.add(const Duration(days: 7));
+         if (_recurrenceInterval == 'Monthly') nextRecurrenceDate = DateTime(_selectedDate!.year, _selectedDate!.month + 1, _selectedDate!.day);
+         if (_recurrenceInterval == 'Yearly') nextRecurrenceDate = DateTime(_selectedDate!.year + 1, _selectedDate!.month, _selectedDate!.day);
+       }
+    }
+
     final newExpense = Expense(
       id: _isEditing ? widget.expenseToEdit!.id : const Uuid().v4(),
       title: enteredTitle,
@@ -102,6 +122,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
           ? _customCategoryController.text
           : _selectedCategory,
       currency: currency,
+      isRecurring: isRecurring,
+      recurrenceInterval: _recurrenceInterval,
+      nextRecurrenceDate: nextRecurrenceDate,
     );
 
     final provider = Provider.of<ExpenseProvider>(context, listen: false);
@@ -144,30 +167,16 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
         const SizedBox(width: 16),
         Expanded(
           flex: 1,
-          child: InputDecorator(
-            decoration: const InputDecoration(
-              labelText: 'Currency',
-              border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: _selectedCurrency,
-                isDense: true,
-                items: AppConstants.currencies.map((currency) {
-                  return DropdownMenuItem(
-                    value: currency,
-                    child: Text(currency),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  if (value == null) return;
-                  setState(() {
-                    _selectedCurrency = value;
-                  });
-                },
-              ),
-            ),
+          child: CustomDropdownField(
+            label: 'Currency',
+            value: _selectedCurrency,
+            items: AppConstants.currencies,
+            onChanged: (value) {
+              if (value == null) return;
+              setState(() {
+                _selectedCurrency = value;
+              });
+            },
           ),
         ),
       ],
@@ -206,27 +215,17 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       ),
     );
 
-    final categoryField = InputDecorator(
-      decoration: const InputDecoration(
-        labelText: 'Category',
-        border: OutlineInputBorder(),
-        prefixIcon: Icon(Icons.category),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: _selectedCategory,
-          isDense: true,
-          items: AppConstants.expenseCategories.map((category) {
-            return DropdownMenuItem(value: category, child: Text(category));
-          }).toList(),
-          onChanged: (value) {
-            if (value == null) return;
-            setState(() {
-              _selectedCategory = value;
-            });
-          },
-        ),
-      ),
+    final categoryField = CustomDropdownField(
+      label: 'Category',
+      value: _selectedCategory,
+      items: AppConstants.expenseCategories,
+      prefixIcon: Icons.category,
+      onChanged: (value) {
+        if (value == null) return;
+        setState(() {
+          _selectedCategory = value;
+        });
+      },
     );
 
     final customCategoryField = _selectedCategory == 'Other'
@@ -242,6 +241,19 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
             ),
           )
         : const SizedBox.shrink();
+
+    final recurrenceField = CustomDropdownField(
+      label: 'Repeat Cycle',
+      value: _recurrenceInterval,
+      items: const ['None', 'Daily', 'Weekly', 'Monthly', 'Yearly'],
+      prefixIcon: Icons.autorenew,
+      onChanged: (value) {
+        if (value == null) return;
+        setState(() {
+          _recurrenceInterval = value;
+        });
+      },
+    );
 
     final submitButton = ElevatedButton(
       onPressed: _submitData,
@@ -297,6 +309,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                   const SizedBox(height: 16),
                                   categoryField,
                                   customCategoryField,
+                                  const SizedBox(height: 16),
+                                  recurrenceField,
                                 ],
                               ),
                             ),
@@ -326,6 +340,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                             const SizedBox(height: 16),
                             categoryField,
                             customCategoryField,
+                            const SizedBox(height: 16),
+                            recurrenceField,
                           ],
                         ),
                       ),

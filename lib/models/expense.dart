@@ -22,6 +22,15 @@ class Expense extends HiveObject {
   @HiveField(5)
   final String currency;
 
+  @HiveField(6, defaultValue: false)
+  final bool isRecurring;
+
+  @HiveField(7, defaultValue: 'None')
+  final String recurrenceInterval; // 'None', 'Daily', 'Weekly', 'Monthly', 'Yearly'
+
+  @HiveField(8, defaultValue: null)
+  DateTime? nextRecurrenceDate;
+
   Expense({
     required this.id,
     required this.title,
@@ -29,5 +38,8 @@ class Expense extends HiveObject {
     required this.date,
     required this.category,
     this.currency = 'RS', // Default currency
+    this.isRecurring = false,
+    this.recurrenceInterval = 'None',
+    this.nextRecurrenceDate,
   });
 }
