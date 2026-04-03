@@ -10,6 +10,7 @@ import 'package:track_expenses/widgets/dashboard/month_selector.dart';
 import 'package:track_expenses/widgets/dashboard/summary_card.dart';
 import 'package:track_expenses/widgets/dashboard/view_selector.dart';
 import 'package:track_expenses/widgets/dashboard/monthly_bar_chart.dart';
+import 'package:track_expenses/widgets/dashboard/weekly_bar_chart.dart';
 import 'package:track_expenses/widgets/expense_list.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -70,6 +71,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (_selectedView == 'Monthly') {
       dailySpendingMonth = expenseProvider.getDailySpendingForMonth(
         _selectedDate,
+        currency: _selectedCurrency,
+      );
+    }
+
+    Map<int, double> dailySpendingWeek = {};
+    if (_selectedView == 'Weekly') {
+      dailySpendingWeek = expenseProvider.getDailyStats(
         currency: _selectedCurrency,
       );
     }
@@ -135,6 +143,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                         const SizedBox(height: 12),
                         CategoryChart(categoryTotals: categoryTotals),
+                        if (_selectedView == 'Weekly') ...[
+                          const SizedBox(height: 12),
+                          WeeklyBarChart(dailySpending: dailySpendingWeek),
+                        ],
                         if (_selectedView == 'Monthly') ...[
                           const SizedBox(height: 12),
                           MonthlyBarChart(dailySpending: dailySpendingMonth),
@@ -204,6 +216,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                   // Category Chart
                   CategoryChart(categoryTotals: categoryTotals),
+                  if (_selectedView == 'Weekly') ...[
+                    const SizedBox(height: 8),
+                    WeeklyBarChart(dailySpending: dailySpendingWeek),
+                  ],
                   if (_selectedView == 'Monthly') ...[
                     const SizedBox(height: 8),
                     MonthlyBarChart(dailySpending: dailySpendingMonth),

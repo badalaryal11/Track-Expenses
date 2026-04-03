@@ -81,21 +81,18 @@ class ExpenseProvider with ChangeNotifier {
   // Daily Stats: Last 7 days (or current week).
   // Let's implement reasonable "Daily" statistics:
   // Map of <WeekDay Index (1-7), Total Amount> for the current week.
-  Map<int, double> getDailyStats() {
+  Map<int, double> getDailyStats({String? currency}) {
     final now = DateTime.now();
-    // Validate if expenses are empty
-    if (_expenses.isEmpty) return {};
-
-    // Find the start of the current week (Monday)
-    // weekday 1 = Mon, 7 = Sun
     final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
     final endOfWeek = startOfWeek.add(const Duration(days: 6));
 
     final Map<int, double> stats = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0};
 
+    if (_expenses.isEmpty) return stats;
+
     for (var expense in _expenses) {
-      // Check if expense is within the current week (ignoring time components for start/end comparison roughly)
-      // A safer way is to truncate dates to YYYY-MM-DD for comparison
+      if (currency != null && expense.currency != currency) continue;
+
       if (_isSameDayOrAfter(expense.date, startOfWeek) &&
           _isSameDayOrBefore(expense.date, endOfWeek)) {
         stats[expense.date.weekday] =
