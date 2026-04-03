@@ -269,10 +269,11 @@ class ExpenseProvider with ChangeNotifier {
           startOfWeek.month,
           startOfWeek.day,
         );
+        final endOfWeek = startOfWeek.add(const Duration(days: 6));
         final end = DateTime(
-          startOfWeek.year,
-          startOfWeek.month,
-          startOfWeek.day + 6,
+          endOfWeek.year,
+          endOfWeek.month,
+          endOfWeek.day,
           23,
           59,
           59,
@@ -294,6 +295,29 @@ class ExpenseProvider with ChangeNotifier {
     }
 
     return totals;
+  }
+
+  /// Returns daily spending broken down by day of the month for the given month and currency.
+  Map<int, double> getDailySpendingForMonth(DateTime monthDate, {String? currency}) {
+    final Map<int, double> spendingByDay = {};
+    
+    // Find the number of days in the month
+    int daysInMonth = DateTime(monthDate.year, monthDate.month + 1, 0).day;
+    
+    // Initialize all days to 0
+    for(int i = 1; i <= daysInMonth; i++) {
+        spendingByDay[i] = 0.0;
+    }
+
+    for (var expense in _expenses) {
+      if (expense.date.year == monthDate.year && expense.date.month == monthDate.month) {
+        if (currency == null || expense.currency == currency) {
+          int day = expense.date.day;
+          spendingByDay[day] = (spendingByDay[day] ?? 0) + expense.amount;
+        }
+      }
+    }
+    return spendingByDay;
   }
 
   // --- Data Export Logic ---

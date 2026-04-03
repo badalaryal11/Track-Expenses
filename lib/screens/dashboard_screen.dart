@@ -9,6 +9,7 @@ import 'package:track_expenses/widgets/category_chart.dart';
 import 'package:track_expenses/widgets/dashboard/month_selector.dart';
 import 'package:track_expenses/widgets/dashboard/summary_card.dart';
 import 'package:track_expenses/widgets/dashboard/view_selector.dart';
+import 'package:track_expenses/widgets/dashboard/monthly_bar_chart.dart';
 import 'package:track_expenses/widgets/expense_list.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -64,6 +65,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
       selectedDate: _selectedDate,
       currency: _selectedCurrency,
     );
+
+    Map<int, double> dailySpendingMonth = {};
+    if (_selectedView == 'Monthly') {
+      dailySpendingMonth = expenseProvider.getDailySpendingForMonth(
+        _selectedDate,
+        currency: _selectedCurrency,
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -126,6 +135,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                         const SizedBox(height: 12),
                         CategoryChart(categoryTotals: categoryTotals),
+                        if (_selectedView == 'Monthly') ...[
+                          const SizedBox(height: 12),
+                          MonthlyBarChart(dailySpending: dailySpendingMonth),
+                        ],
                       ],
                     ),
                   ),
@@ -191,6 +204,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                   // Category Chart
                   CategoryChart(categoryTotals: categoryTotals),
+                  if (_selectedView == 'Monthly') ...[
+                    const SizedBox(height: 8),
+                    MonthlyBarChart(dailySpending: dailySpendingMonth),
+                  ],
                   const SizedBox(height: 8),
 
                   // Recent Transactions Header
@@ -214,9 +231,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
 
                   // Expense List
-                  const SizedBox(
-                    height: 400,
-                    child: ExpenseList(physics: NeverScrollableScrollPhysics()),
+                  const ExpenseList(
+                    physics: NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
                   ),
                 ],
               ),
