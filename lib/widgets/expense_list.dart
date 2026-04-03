@@ -3,18 +3,20 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:track_expenses/providers/expense_provider.dart';
 import 'package:track_expenses/screens/add_expense_screen.dart';
+import 'package:track_expenses/models/expense.dart';
 
 class ExpenseList extends StatelessWidget {
   final ScrollPhysics? physics;
   final bool shrinkWrap;
+  final List<Expense>? customExpenses;
 
-  const ExpenseList({super.key, this.physics, this.shrinkWrap = false});
+  const ExpenseList({super.key, this.physics, this.shrinkWrap = false, this.customExpenses});
 
   @override
   Widget build(BuildContext context) {
     return Consumer<ExpenseProvider>(
       builder: (context, provider, child) {
-        final expenses = provider.expenses;
+        final expenses = customExpenses ?? provider.expenses;
 
         if (expenses.isEmpty) {
           return Center(
