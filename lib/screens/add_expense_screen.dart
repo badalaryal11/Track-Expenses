@@ -78,6 +78,36 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     });
   }
 
+  void _deleteExpense() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Expense'),
+        content: const Text(
+            'Are you sure you want to delete this expense? This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              final provider =
+                  Provider.of<ExpenseProvider>(context, listen: false);
+              provider.deleteExpense(widget.expenseToEdit!);
+              Navigator.of(context).pop();
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _submitData() {
     if (_titleController.text.isEmpty ||
         _amountController.text.isEmpty ||
@@ -144,6 +174,22 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       provider.addExpense(newExpense);
     }
     Navigator.of(context).pop();
+  }
+
+  Widget _buildDeleteButton() {
+    return OutlinedButton.icon(
+      onPressed: _deleteExpense,
+      icon: const Icon(Icons.delete_outline, color: Colors.red),
+      label: const Text(
+        'Delete Expense',
+        style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+      ),
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        side: const BorderSide(color: Colors.red),
+      ),
+    );
   }
 
   @override
@@ -280,7 +326,18 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     );
 
     return Scaffold(
-      appBar: AppBar(title: Text(_isEditing ? 'Edit Expense' : 'Add New Expense')),
+      appBar: AppBar(
+        title: Text(_isEditing ? 'Edit Expense' : 'Add New Expense'),
+        actions: [
+          if (_isEditing)
+            IconButton(
+              icon: const Icon(Icons.delete_outline),
+              tooltip: 'Delete Expense',
+              color: Colors.redAccent,
+              onPressed: _deleteExpense,
+            ),
+        ],
+      ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -327,6 +384,11 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                           ),
                           const SizedBox(height: 24),
                           submitButton,
+                          if (_isEditing) ...
+                          [
+                            const SizedBox(height: 12),
+                            _buildDeleteButton(),
+                          ],
                         ],
                       ),
                     ),
@@ -358,6 +420,11 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                     ),
                     const SizedBox(height: 24),
                     submitButton,
+                    if (_isEditing) ...
+                    [
+                      const SizedBox(height: 12),
+                      _buildDeleteButton(),
+                    ],
                   ],
                 ),
         ),
