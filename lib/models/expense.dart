@@ -37,7 +37,7 @@ class Expense extends HiveObject {
     required this.amount,
     required this.date,
     required this.category,
-    this.currency = 'RS', // Default currency
+    this.currency = 'NPR', // Default currency
     this.isRecurring = false,
     this.recurrenceInterval = 'None',
     this.nextRecurrenceDate,

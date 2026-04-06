@@ -34,8 +34,9 @@ class ExpenseProvider with ChangeNotifier {
     _defaultCurrency = settingsBox.get(_defaultCurrencyKey, defaultValue: _fallbackCurrency);
 
     _sortExpenses();
-    bool hasUpdates = await _recurringService.processRecurringExpenses(_expenses);
-    if (hasUpdates) {
+    final newExpenses = await _recurringService.processRecurringExpenses(_expenses);
+    if (newExpenses.isNotEmpty) {
+      _expenses.addAll(newExpenses);
       _sortExpenses();
     }
     notifyListeners();
@@ -76,10 +77,13 @@ class ExpenseProvider with ChangeNotifier {
   }
 
   Future<void> updateExpense(Expense oldExpense, Expense updatedExpense) async {
-    await _repository.deleteExpense(oldExpense);
-    _expenses.remove(oldExpense);
-    await _repository.addExpense(updatedExpense);
-    _expenses.add(updatedExpense);
+    await _repository.updateExpense(oldExpense, updatedExpense);
+    final index = _expenses.indexOf(oldExpense);
+    if (index != -1) {
+      _expenses[index] = updatedExpense;
+    } else {
+      _expenses.add(updatedExpense);
+    }
     _sortExpenses();
     notifyListeners();
   }

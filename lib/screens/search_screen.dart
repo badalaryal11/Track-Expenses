@@ -78,26 +78,36 @@ class _SearchScreenState extends State<SearchScreen> {
                   const SizedBox(height: 16),
                   
                   // Currency Filter
-                  InputDecorator(
-                    decoration: const InputDecoration(
-                      labelText: 'Currency', 
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.currency_exchange),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String?>(
-                        value: _selectedCurrency,
-                        isDense: true,
-                        items: [
-                          const DropdownMenuItem(value: null, child: Text('All Currencies')),
-                          ...AppConstants.currencies.map((c) => DropdownMenuItem(value: c, child: Text(c))),
-                        ],
-                        onChanged: (val) {
-                          setModalState(() { _selectedCurrency = val; });
-                          setState(() { _selectedCurrency = val; });
-                        },
-                      ),
-                    ),
+                  Builder(
+                    builder: (context) {
+                      final provider = Provider.of<ExpenseProvider>(context, listen: false);
+                      final actualCurrencies = provider.uniqueCurrencies;
+                      // Reset filter if selected currency no longer exists
+                      if (_selectedCurrency != null && !actualCurrencies.contains(_selectedCurrency)) {
+                        _selectedCurrency = null;
+                      }
+                      return InputDecorator(
+                        decoration: const InputDecoration(
+                          labelText: 'Currency', 
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.currency_exchange),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String?>(
+                            value: _selectedCurrency,
+                            isDense: true,
+                            items: [
+                              const DropdownMenuItem(value: null, child: Text('All Currencies')),
+                              ...actualCurrencies.map((c) => DropdownMenuItem(value: c, child: Text(c))),
+                            ],
+                            onChanged: (val) {
+                              setModalState(() { _selectedCurrency = val; });
+                              setState(() { _selectedCurrency = val; });
+                            },
+                          ),
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 32),
                   ElevatedButton(

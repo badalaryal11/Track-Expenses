@@ -65,9 +65,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   }
 
   void _presentDatePicker() {
+    final initial = _selectedDate ?? DateTime.now();
     showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: initial.isAfter(DateTime.now()) ? DateTime.now() : initial,
       firstDate: DateTime(2023),
       lastDate: DateTime.now(),
     ).then((pickedDate) {
@@ -141,15 +142,39 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     if (isRecurring && !(_isEditing && widget.expenseToEdit!.isRecurring)) {
        if (_recurrenceInterval == 'Daily') nextRecurrenceDate = _selectedDate!.add(const Duration(days: 1));
        if (_recurrenceInterval == 'Weekly') nextRecurrenceDate = _selectedDate!.add(const Duration(days: 7));
-       if (_recurrenceInterval == 'Monthly') nextRecurrenceDate = DateTime(_selectedDate!.year, _selectedDate!.month + 1, _selectedDate!.day);
-       if (_recurrenceInterval == 'Yearly') nextRecurrenceDate = DateTime(_selectedDate!.year + 1, _selectedDate!.month, _selectedDate!.day);
+       if (_recurrenceInterval == 'Monthly') {
+         final targetMonth = _selectedDate!.month + 1;
+         final targetYear = targetMonth > 12 ? _selectedDate!.year + 1 : _selectedDate!.year;
+         final normalizedMonth = targetMonth > 12 ? targetMonth - 12 : targetMonth;
+         final daysInMonth = DateTime(targetYear, normalizedMonth + 1, 0).day;
+         final day = _selectedDate!.day > daysInMonth ? daysInMonth : _selectedDate!.day;
+         nextRecurrenceDate = DateTime(targetYear, normalizedMonth, day);
+       }
+       if (_recurrenceInterval == 'Yearly') {
+         final targetYear = _selectedDate!.year + 1;
+         final daysInMonth = DateTime(targetYear, _selectedDate!.month + 1, 0).day;
+         final day = _selectedDate!.day > daysInMonth ? daysInMonth : _selectedDate!.day;
+         nextRecurrenceDate = DateTime(targetYear, _selectedDate!.month, day);
+       }
     } else if (_isEditing && isRecurring) {
        nextRecurrenceDate = widget.expenseToEdit?.nextRecurrenceDate;
        if (nextRecurrenceDate == null) {
          if (_recurrenceInterval == 'Daily') nextRecurrenceDate = _selectedDate!.add(const Duration(days: 1));
          if (_recurrenceInterval == 'Weekly') nextRecurrenceDate = _selectedDate!.add(const Duration(days: 7));
-         if (_recurrenceInterval == 'Monthly') nextRecurrenceDate = DateTime(_selectedDate!.year, _selectedDate!.month + 1, _selectedDate!.day);
-         if (_recurrenceInterval == 'Yearly') nextRecurrenceDate = DateTime(_selectedDate!.year + 1, _selectedDate!.month, _selectedDate!.day);
+         if (_recurrenceInterval == 'Monthly') {
+         final targetMonth = _selectedDate!.month + 1;
+         final targetYear = targetMonth > 12 ? _selectedDate!.year + 1 : _selectedDate!.year;
+         final normalizedMonth = targetMonth > 12 ? targetMonth - 12 : targetMonth;
+         final daysInMonth = DateTime(targetYear, normalizedMonth + 1, 0).day;
+         final day = _selectedDate!.day > daysInMonth ? daysInMonth : _selectedDate!.day;
+         nextRecurrenceDate = DateTime(targetYear, normalizedMonth, day);
+       }
+         if (_recurrenceInterval == 'Yearly') {
+         final targetYear = _selectedDate!.year + 1;
+         final daysInMonth = DateTime(targetYear, _selectedDate!.month + 1, 0).day;
+         final day = _selectedDate!.day > daysInMonth ? daysInMonth : _selectedDate!.day;
+         nextRecurrenceDate = DateTime(targetYear, _selectedDate!.month, day);
+       }
        }
     }
 

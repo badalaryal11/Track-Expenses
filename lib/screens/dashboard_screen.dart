@@ -34,8 +34,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final expenseProvider = Provider.of<ExpenseProvider>(context);
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final expenseProvider = Provider.of<ExpenseProvider>(context, listen: false);
     final currencies = expenseProvider.uniqueCurrencies;
 
     // Initialize selected currency from saved default on first build
@@ -47,8 +48,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
     } else if (currencies.isEmpty) {
       _selectedCurrency = expenseProvider.defaultCurrency;
     }
+  }
 
-    final String currency = _selectedCurrency!;
+  @override
+  Widget build(BuildContext context) {
+    final expenseProvider = Provider.of<ExpenseProvider>(context);
+    final currencies = expenseProvider.uniqueCurrencies;
+
+    final String currency = _selectedCurrency ?? expenseProvider.defaultCurrency;
 
     // Get stats based on selection
     double currentTotal = 0.0;
