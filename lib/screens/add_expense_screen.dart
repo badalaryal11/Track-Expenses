@@ -79,6 +79,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     });
   }
 
+
   void _deleteExpense() {
     showDialog(
       context: context,
@@ -105,6 +106,22 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
             child: const Text('Delete'),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDeleteButton() {
+    return ElevatedButton.icon(
+      onPressed: _deleteExpense,
+      icon: const Icon(Icons.delete_outline, color: Colors.white),
+      label: const Text(
+        'Delete Expense',
+        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+      ),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.red,
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );
   }
@@ -201,21 +218,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     Navigator.of(context).pop();
   }
 
-  Widget _buildDeleteButton() {
-    return OutlinedButton.icon(
-      onPressed: _deleteExpense,
-      icon: const Icon(Icons.delete_outline, color: Colors.red),
-      label: const Text(
-        'Delete Expense',
-        style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-      ),
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        side: const BorderSide(color: Colors.red),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -353,15 +355,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_isEditing ? 'Edit Expense' : 'Add New Expense'),
-        actions: [
-          if (_isEditing)
-            IconButton(
-              icon: const Icon(Icons.delete_outline),
-              tooltip: 'Delete Expense',
-              color: Colors.redAccent,
-              onPressed: _deleteExpense,
-            ),
-        ],
+        actions: [],
       ),
       body: SingleChildScrollView(
         child: Padding(
