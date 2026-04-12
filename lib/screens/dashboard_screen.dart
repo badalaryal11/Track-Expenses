@@ -6,6 +6,7 @@ import 'package:track_expenses/constants/app_constants.dart';
 import 'package:track_expenses/providers/expense_provider.dart';
 import 'package:track_expenses/screens/add_expense_screen.dart';
 import 'package:track_expenses/screens/search_screen.dart';
+import 'package:track_expenses/screens/pin_setup_screen.dart';
 import 'package:track_expenses/widgets/category_chart.dart';
 import 'package:track_expenses/widgets/dashboard/month_selector.dart';
 import 'package:track_expenses/widgets/dashboard/summary_card.dart';
@@ -464,21 +465,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   },
                 ),
                 const Divider(height: 1),
-                StatefulBuilder(
-                  builder: (context, setState) {
-                    return SwitchListTile(
-                      secondary: const Icon(Icons.fingerprint),
-                      title: const Text('Require App Lock'),
-                      subtitle: const Text('Use biometrics or device lock to open app'),
-                      value: provider.requireAuth,
-                      onChanged: (bool value) async {
-                        // Before enabling, we could optionally prompt for auth to verify they can.
-                        // For now, we'll just set it.
-                        await provider.setRequireAuth(value);
-                        setState(() {}); // Update the switch visually
-                      },
-                    );
-                  }
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.pin),
+                  title: Text(provider.hasPinSetup ? 'Remove App PIN' : 'Set App PIN'),
+                  subtitle: Text(provider.hasPinSetup ? 'Disable PIN lock' : 'Protect app with a 4-digit PIN'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.of(ctx).pop();
+                    if (provider.hasPinSetup) {
+                      provider.removeAppPin();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('App PIN removed')),
+                      );
+                    } else {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const PinSetupScreen()),
+                      );
+                    }
+                  },
                 ),
                 const Divider(height: 1),
                 ListTile(

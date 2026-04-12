@@ -12,16 +12,17 @@ class ExpenseProvider with ChangeNotifier {
 
   static const _settingsBoxName = 'settings';
   static const _defaultCurrencyKey = 'defaultCurrency';
-  static const _requireAuthKey = 'requireAuth';
+  static const _appPinKey = 'appPin';
   static const _fallbackCurrency = 'NPR';
 
   List<Expense> _expenses = [];
   String _defaultCurrency = _fallbackCurrency;
-  bool _requireAuth = false;
+  String? _appPin;
 
   List<Expense> get expenses => _expenses;
   String get defaultCurrency => _defaultCurrency;
-  bool get requireAuth => _requireAuth;
+  String? get appPin => _appPin;
+  bool get hasPinSetup => _appPin != null && _appPin!.isNotEmpty;
 
   ExpenseProvider() {
     _recurringService = RecurringExpenseService(_repository);
@@ -66,7 +67,7 @@ class ExpenseProvider with ChangeNotifier {
     // Load saved settings
     final settingsBox = await Hive.openBox(_settingsBoxName);
     _defaultCurrency = settingsBox.get(_defaultCurrencyKey, defaultValue: _fallbackCurrency);
-    _requireAuth = settingsBox.get(_requireAuthKey, defaultValue: false);
+    _appPin = settingsBox.get(_appPinKey);
 
     _sortExpenses();
     final newExpenses = await _recurringService.processRecurringExpenses(_expenses);
@@ -84,10 +85,17 @@ class ExpenseProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> setRequireAuth(bool require) async {
-    _requireAuth = require;
+  Future<void> setAppPin(String pin) async {
+    _appPin = pin;
     final settingsBox = await Hive.openBox(_settingsBoxName);
-    await settingsBox.put(_requireAuthKey, require);
+    await settingsBox.put(_appPinKey, pin);
+    notifyListeners();
+  }
+
+  Future<void> removeAppPin() async {
+    _appPin = null;
+    final settingsBox = await Hive.openBox(_settingsBoxName);
+    await settingsBox.delete(_appPinKey);
     notifyListeners();
   }
 
@@ -117,7 +125,7 @@ class ExpenseProvider with ChangeNotifier {
     await _repository.clearAll();
     _expenses.clear();
     _defaultCurrency = _fallbackCurrency;
-    _requireAuth = false;
+    _appPin = null;
     final settingsBox = await Hive.openBox(_settingsBoxName);
     await settingsBox.clear();
     notifyListeners();

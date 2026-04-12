@@ -45,7 +45,5 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-	<key>NSFaceIDUsageDescription</key>
-	<string>This app requires Face ID permission to authenticate and unlock your expense data.</string>
 </dict>
 </plist>

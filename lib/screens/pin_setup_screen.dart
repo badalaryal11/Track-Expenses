@@ -2,59 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:track_expenses/providers/expense_provider.dart';
 
-class AuthWrapper extends StatefulWidget {
-  final Widget child;
-
-  const AuthWrapper({super.key, required this.child});
+class PinSetupScreen extends StatefulWidget {
+  const PinSetupScreen({super.key});
 
   @override
-  State<AuthWrapper> createState() => _AuthWrapperState();
+  State<PinSetupScreen> createState() => _PinSetupScreenState();
 }
 
-class _AuthWrapperState extends State<AuthWrapper> with WidgetsBindingObserver {
-  bool _isAuthenticated = false;
+class _PinSetupScreenState extends State<PinSetupScreen> {
   String _enteredPin = '';
+  String _confirmedPin = '';
+  bool _isConfirming = false;
   String _errorMessage = '';
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkInitialAuth();
-    });
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
-      final provider = Provider.of<ExpenseProvider>(context, listen: false);
-      if (provider.hasPinSetup) {
-        setState(() {
-          _isAuthenticated = false;
-          _enteredPin = '';
-          _errorMessage = '';
-        });
-      }
-    }
-  }
-
-  void _checkInitialAuth() {
-    if (!mounted) return;
-    
-    final provider = Provider.of<ExpenseProvider>(context, listen: false);
-    if (!provider.hasPinSetup) {
-      setState(() {
-        _isAuthenticated = true;
-      });
-    }
-  }
 
   void _onDigitPressed(String digit) {
     setState(() {
@@ -62,14 +21,20 @@ class _AuthWrapperState extends State<AuthWrapper> with WidgetsBindingObserver {
       if (_enteredPin.length < 4) {
         _enteredPin += digit;
       }
-      
       if (_enteredPin.length == 4) {
-        final provider = Provider.of<ExpenseProvider>(context, listen: false);
-        if (_enteredPin == provider.appPin) {
-          _isAuthenticated = true;
-        } else {
-          _errorMessage = 'Incorrect PIN';
+        if (!_isConfirming) {
+          _isConfirming = true;
+          _confirmedPin = _enteredPin;
           _enteredPin = '';
+        } else {
+          if (_enteredPin == _confirmedPin) {
+            _savePinAndExit();
+          } else {
+            _errorMessage = 'PINs do not match. Try again.';
+            _isConfirming = false;
+            _enteredPin = '';
+            _confirmedPin = '';
+          }
         }
       }
     });
@@ -82,6 +47,17 @@ class _AuthWrapperState extends State<AuthWrapper> with WidgetsBindingObserver {
         _enteredPin = _enteredPin.substring(0, _enteredPin.length - 1);
       }
     });
+  }
+
+  void _savePinAndExit() async {
+    final provider = Provider.of<ExpenseProvider>(context, listen: false);
+    await provider.setAppPin(_confirmedPin);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('App PIN set successfully')),
+      );
+      Navigator.of(context).pop();
+    }
   }
 
   Widget _buildDot(int index) {
@@ -123,22 +99,19 @@ class _AuthWrapperState extends State<AuthWrapper> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<ExpenseProvider>(context);
-    
-    if (!provider.hasPinSetup || _isAuthenticated) {
-      return widget.child;
-    }
-
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Setup PIN'),
+      ),
       body: SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Spacer(),
-            Icon(Icons.lock, size: 64, color: Theme.of(context).colorScheme.primary),
+            Icon(Icons.lock_outline, size: 64, color: Theme.of(context).colorScheme.primary),
             const SizedBox(height: 24),
             Text(
-              'Enter App PIN',
+              _isConfirming ? 'Confirm your PIN' : 'Enter a 4-digit PIN',
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 16),
@@ -180,7 +153,7 @@ class _AuthWrapperState extends State<AuthWrapper> with WidgetsBindingObserver {
                   ),
                   Row(
                     children: [
-                      const Expanded(child: SizedBox()), // empty slot
+                      Expanded(child: SizedBox()), // empty slot
                       _buildKeypadButton('0', onPressed: () => _onDigitPressed('0')),
                       _buildKeypadButton('', icon: Icons.backspace_outlined, onPressed: _onDeletePressed),
                     ],
