@@ -464,6 +464,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   },
                 ),
                 const Divider(height: 1),
+                StatefulBuilder(
+                  builder: (context, setState) {
+                    return SwitchListTile(
+                      secondary: const Icon(Icons.fingerprint),
+                      title: const Text('Require App Lock'),
+                      subtitle: const Text('Use biometrics or device lock to open app'),
+                      value: provider.requireAuth,
+                      onChanged: (bool value) async {
+                        // Before enabling, we could optionally prompt for auth to verify they can.
+                        // For now, we'll just set it.
+                        await provider.setRequireAuth(value);
+                        setState(() {}); // Update the switch visually
+                      },
+                    );
+                  }
+                ),
+                const Divider(height: 1),
                 ListTile(
                   leading: Icon(Icons.delete_forever, color: Colors.red.shade400),
                   title: Text(

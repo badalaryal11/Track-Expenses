@@ -12,26 +12,61 @@ class ExpenseProvider with ChangeNotifier {
 
   static const _settingsBoxName = 'settings';
   static const _defaultCurrencyKey = 'defaultCurrency';
+  static const _requireAuthKey = 'requireAuth';
   static const _fallbackCurrency = 'NPR';
 
   List<Expense> _expenses = [];
   String _defaultCurrency = _fallbackCurrency;
+  bool _requireAuth = false;
 
   List<Expense> get expenses => _expenses;
   String get defaultCurrency => _defaultCurrency;
+  bool get requireAuth => _requireAuth;
 
   ExpenseProvider() {
     _recurringService = RecurringExpenseService(_repository);
     _exportService = ExportService();
   }
 
+  // --- Search Functionality ---
+
+  /// Searches expenses by title (case-insensitive, partial match).
+  /// Returns a list of matching expenses.
+  List<Expense> searchExpenses(String query) {
+    if (query.isEmpty) {
+      return _expenses;
+    }
+    
+    final lowerQuery = query.toLowerCase();
+    return _expenses.where((expense) {
+      return expense.title.toLowerCase().contains(lowerQuery);
+    }).toList();
+  }
+
+  /// Searches expenses by title and category (case-insensitive, partial match).
+  /// Returns a list of matching expenses.
+  List<Expense> searchExpensesWithCategory(String query, String category) {
+    if (query.isEmpty && category == 'All') {
+      return _expenses;
+    }
+    
+    final lowerQuery = query.toLowerCase();
+    return _expenses.where((expense) {
+      final matchesTitle = query.isEmpty || expense.title.toLowerCase().contains(lowerQuery);
+      final matchesCategory = category == 'All' || expense.category == category;
+      return matchesTitle && matchesCategory;
+    }).toList();
+  }
+
+
   Future<void> init() async {
     await _repository.init();
     _expenses = _repository.getAllExpenses();
 
-    // Load saved default currency
+    // Load saved settings
     final settingsBox = await Hive.openBox(_settingsBoxName);
     _defaultCurrency = settingsBox.get(_defaultCurrencyKey, defaultValue: _fallbackCurrency);
+    _requireAuth = settingsBox.get(_requireAuthKey, defaultValue: false);
 
     _sortExpenses();
     final newExpenses = await _recurringService.processRecurringExpenses(_expenses);
@@ -49,11 +84,40 @@ class ExpenseProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> setRequireAuth(bool require) async {
+    _requireAuth = require;
+    final settingsBox = await Hive.openBox(_settingsBoxName);
+    await settingsBox.put(_requireAuthKey, require);
+    notifyListeners();
+  }
+
+  /// Searches expenses by title, category, and currency (case-insensitive, partial match).
+  /// Returns a list of matching expenses.
+  List<Expense> searchExpensesWithFilters({
+    required String query,
+    String? category,
+    String? currency,
+  }) {
+    if (query.isEmpty && category == null && currency == null) {
+      return _expenses;
+    }
+    
+    final lowerQuery = query.toLowerCase();
+    return _expenses.where((expense) {
+      final matchesTitle = query.isEmpty || expense.title.toLowerCase().contains(lowerQuery);
+      final matchesCategory = category == null || expense.category == category;
+      final matchesCurrency = currency == null || expense.currency == currency;
+      return matchesTitle && matchesCategory && matchesCurrency;
+    }).toList();
+  }
+  
+
   /// Clears all expense data and resets settings.
   Future<void> clearAllData() async {
     await _repository.clearAll();
     _expenses.clear();
     _defaultCurrency = _fallbackCurrency;
+    _requireAuth = false;
     final settingsBox = await Hive.openBox(_settingsBoxName);
     await settingsBox.clear();
     notifyListeners();

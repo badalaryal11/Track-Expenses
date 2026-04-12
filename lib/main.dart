@@ -4,6 +4,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:track_expenses/models/expense.dart';
 import 'package:track_expenses/providers/expense_provider.dart';
+import 'package:track_expenses/screens/auth_wrapper.dart';
 import 'package:track_expenses/screens/dashboard_screen.dart';
 
 import 'package:flutter/services.dart';
@@ -65,19 +66,33 @@ class InitWrapper extends StatefulWidget {
 }
 
 class _InitWrapperState extends State<InitWrapper> {
+  bool _isInitialized = false;
+
   @override
   void initState() {
     super.initState();
     // Initialize provider
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
-        Provider.of<ExpenseProvider>(context, listen: false).init();
+        await Provider.of<ExpenseProvider>(context, listen: false).init();
+        if (mounted) {
+          setState(() {
+            _isInitialized = true;
+          });
+        }
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return const DashboardScreen();
+    if (!_isInitialized) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+    return const AuthWrapper(child: DashboardScreen());
   }
 }
