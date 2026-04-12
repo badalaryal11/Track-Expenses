@@ -16,6 +16,7 @@ class _AuthWrapperState extends State<AuthWrapper> with WidgetsBindingObserver {
   final LocalAuthentication auth = LocalAuthentication();
   bool _isAuthenticated = false;
   bool _isChecking = true;
+  bool _isAuthenticating = false;
 
   @override
   void initState() {
@@ -34,6 +35,8 @@ class _AuthWrapperState extends State<AuthWrapper> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (_isAuthenticating) return;
+
     if (state == AppLifecycleState.resumed) {
       if (mounted) {
         _checkAuth();
@@ -50,6 +53,7 @@ class _AuthWrapperState extends State<AuthWrapper> with WidgetsBindingObserver {
 
   Future<void> _checkAuth() async {
     if (!mounted) return;
+    if (_isAuthenticating) return;
     
     final provider = Provider.of<ExpenseProvider>(context, listen: false);
     
@@ -65,6 +69,7 @@ class _AuthWrapperState extends State<AuthWrapper> with WidgetsBindingObserver {
 
     setState(() {
       _isChecking = true;
+      _isAuthenticating = true;
     });
 
     bool authenticated = false;
@@ -91,6 +96,7 @@ class _AuthWrapperState extends State<AuthWrapper> with WidgetsBindingObserver {
       setState(() {
         _isAuthenticated = authenticated;
         _isChecking = false;
+        _isAuthenticating = false;
       });
     }
   }
