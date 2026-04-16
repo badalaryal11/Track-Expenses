@@ -5,12 +5,12 @@ import 'package:provider/provider.dart';
 import 'package:track_expenses/constants/app_constants.dart';
 import 'package:track_expenses/providers/expense_provider.dart';
 import 'package:track_expenses/screens/add_expense_screen.dart';
-import 'package:track_expenses/screens/search_screen.dart';
 import 'package:track_expenses/screens/pin_setup_screen.dart';
 import 'package:track_expenses/widgets/category_chart.dart';
 import 'package:track_expenses/widgets/dashboard/month_selector.dart';
 import 'package:track_expenses/widgets/dashboard/summary_card.dart';
 import 'package:track_expenses/widgets/dashboard/view_selector.dart';
+import 'package:track_expenses/screens/all_transactions_screen.dart';
 import 'package:track_expenses/widgets/dashboard/monthly_bar_chart.dart';
 import 'package:track_expenses/widgets/dashboard/weekly_bar_chart.dart';
 import 'package:track_expenses/widgets/expense_list.dart';
@@ -102,13 +102,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
         actions: [
           IconButton(
             onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SearchScreen()));
-            },
-            icon: const Icon(Icons.search),
-            tooltip: 'Search & Filter',
-          ),
-          IconButton(
-            onPressed: () {
               _showYearlyTotalDialog(context, expenseProvider);
             },
             icon: const Icon(Icons.calendar_today),
@@ -198,14 +191,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             ),
                             TextButton(
                               onPressed: () {
-                                // Navigate to full list if needed
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(builder: (_) => const AllTransactionsScreen()),
+                                );
                               },
                               child: const Text('View All'),
                             ),
                           ],
                         ),
                       ),
-                      const Expanded(child: ExpenseList()),
+                      const Expanded(child: ExpenseList(itemLimit: 5)),
                     ],
                   ),
                 ),
@@ -266,7 +261,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                         TextButton(
                           onPressed: () {
-                            // Navigate to full list if needed
+                            Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const AllTransactionsScreen()),
+                            );
                           },
                           child: const Text('View All'),
                         ),
@@ -278,6 +275,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   const ExpenseList(
                     physics: NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
+                    itemLimit: 5,
                   ),
                 ],
               ),

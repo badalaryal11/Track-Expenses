@@ -33,7 +33,7 @@ class _AuthWrapperState extends State<AuthWrapper> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+    if (state == AppLifecycleState.paused) {
       final provider = Provider.of<ExpenseProvider>(context, listen: false);
       if (provider.hasPinSetup) {
         setState(() {

@@ -9,14 +9,18 @@ class ExpenseList extends StatelessWidget {
   final ScrollPhysics? physics;
   final bool shrinkWrap;
   final List<Expense>? customExpenses;
+  final int? itemLimit;
 
-  const ExpenseList({super.key, this.physics, this.shrinkWrap = false, this.customExpenses});
+  const ExpenseList({super.key, this.physics, this.shrinkWrap = false, this.customExpenses, this.itemLimit});
 
   @override
   Widget build(BuildContext context) {
     return Consumer<ExpenseProvider>(
       builder: (context, provider, child) {
-        final expenses = customExpenses ?? provider.expenses;
+        final allExpenses = customExpenses ?? provider.expenses;
+        final expenses = itemLimit != null && allExpenses.length > itemLimit! 
+            ? allExpenses.sublist(0, itemLimit)
+            : allExpenses;
 
         if (expenses.isEmpty) {
           return Center(
