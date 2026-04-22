@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:track_expenses/constants/app_constants.dart';
 import 'package:track_expenses/models/expense.dart';
 import 'package:track_expenses/providers/expense_provider.dart';
 import 'package:track_expenses/widgets/expense_list.dart';
@@ -96,7 +95,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                         isDense: true,
                         items: [
                           const DropdownMenuItem(value: null, child: Text('All Categories')),
-                          ...AppConstants.expenseCategories.map((c) => DropdownMenuItem(value: c, child: Text(c))),
+                          ...Provider.of<ExpenseProvider>(context, listen: false).expenseCategories.map((c) => DropdownMenuItem(value: c, child: Text(c))),
                         ],
                         onChanged: (val) {
                           setModalState(() { _selectedCategory = val; });

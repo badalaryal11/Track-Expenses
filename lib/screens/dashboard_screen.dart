@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:track_expenses/constants/app_constants.dart';
 import 'package:track_expenses/providers/expense_provider.dart';
 import 'package:track_expenses/screens/add_expense_screen.dart';
+import 'package:track_expenses/screens/manage_categories_screen.dart';
 import 'package:track_expenses/screens/pin_setup_screen.dart';
 import 'package:track_expenses/widgets/category_chart.dart';
 import 'package:track_expenses/widgets/dashboard/month_selector.dart';
@@ -435,7 +436,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         return SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 16),
-            child: Column(
+            child: SingleChildScrollView(
+              child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
@@ -477,6 +479,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 const Divider(height: 1),
                 ListTile(
+                  leading: const Icon(Icons.category),
+                  title: const Text('Manage Categories'),
+                  subtitle: const Text('Add or remove custom categories'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.of(ctx).pop();
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const ManageCategoriesScreen()),
+                    );
+                  },
+                ),
+                const Divider(height: 1),
+                ListTile(
                   leading: const Icon(Icons.pin),
                   title: Text(provider.hasPinSetup ? 'Remove App PIN' : 'Set App PIN'),
                   subtitle: Text(provider.hasPinSetup ? 'Disable PIN lock' : 'Protect app with a 4-digit PIN'),
@@ -510,6 +525,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   },
                 ),
               ],
+            ),
             ),
           ),
         );

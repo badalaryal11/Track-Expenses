@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:track_expenses/providers/expense_provider.dart';
 import 'package:track_expenses/screens/add_expense_screen.dart';
 import 'package:track_expenses/models/expense.dart';
-import 'package:track_expenses/constants/app_constants.dart';
 
 class ExpenseList extends StatelessWidget {
   final ScrollPhysics? physics;
@@ -58,7 +57,7 @@ class ExpenseList extends StatelessWidget {
           itemCount: expenses.length,
           itemBuilder: (context, index) {
             final expense = expenses[index];
-            final categoryColor = AppConstants.getCategoryColor(expense.category);
+            final categoryColor = provider.getCategoryColor(expense.category);
             return Dismissible(
               key: ValueKey(expense.id),
               direction: DismissDirection.endToStart,
@@ -111,7 +110,7 @@ class ExpenseList extends StatelessWidget {
                   leading: CircleAvatar(
                     backgroundColor: categoryColor.withValues(alpha: 0.15),
                     child: Icon(
-                      AppConstants.getCategoryIcon(expense.category),
+                      provider.getCategoryIcon(expense.category),
                       color: categoryColor,
                     ),
                   ),

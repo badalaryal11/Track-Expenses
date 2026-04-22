@@ -1,9 +1,11 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:track_expenses/constants/app_constants.dart';
 import 'package:track_expenses/models/expense.dart';
 import 'package:track_expenses/repositories/expense_repository.dart';
 import 'package:track_expenses/services/export_service.dart';
 import 'package:track_expenses/services/recurring_expense_service.dart';
+import 'dart:convert';
 
 class ExpenseProvider with ChangeNotifier {
   final ExpenseRepository _repository = ExpenseRepository();
@@ -14,9 +16,11 @@ class ExpenseProvider with ChangeNotifier {
   static const _defaultCurrencyKey = 'defaultCurrency';
   static const _appPinKey = 'appPin';
   static const _monthlyBudgetKey = 'monthlyBudget';
+  static const _customCategoriesKey = 'customCategories';
   static const _fallbackCurrency = 'NPR';
 
   List<Expense> _expenses = [];
+  List<AppCategory> _customCategories = [];
   String _defaultCurrency = _fallbackCurrency;
   String? _appPin;
   double _monthlyBudget = 0.0;
@@ -26,6 +30,25 @@ class ExpenseProvider with ChangeNotifier {
   String? get appPin => _appPin;
   double get monthlyBudget => _monthlyBudget;
   bool get hasPinSetup => _appPin != null && _appPin!.isNotEmpty;
+
+  List<AppCategory> get allCategories => [...AppConstants.categories, ..._customCategories];
+  List<String> get expenseCategories => allCategories.map((c) => c.name).toList();
+
+  Color getCategoryColor(String categoryName) {
+    final category = allCategories.firstWhere(
+      (c) => c.name.toLowerCase() == categoryName.toLowerCase(),
+      orElse: () => const AppCategory(name: 'Other', icon: Icons.attach_money, color: Colors.grey),
+    );
+    return category.color;
+  }
+
+  IconData getCategoryIcon(String categoryName) {
+    final category = allCategories.firstWhere(
+      (c) => c.name.toLowerCase() == categoryName.toLowerCase(),
+      orElse: () => const AppCategory(name: 'Other', icon: Icons.attach_money, color: Colors.grey),
+    );
+    return category.icon;
+  }
 
   ExpenseProvider() {
     _recurringService = RecurringExpenseService(_repository);
@@ -72,6 +95,16 @@ class ExpenseProvider with ChangeNotifier {
     _defaultCurrency = settingsBox.get(_defaultCurrencyKey, defaultValue: _fallbackCurrency);
     _appPin = settingsBox.get(_appPinKey);
     _monthlyBudget = settingsBox.get(_monthlyBudgetKey, defaultValue: 0.0);
+    
+    final customCatsJson = settingsBox.get(_customCategoriesKey, defaultValue: <String>[]);
+    _customCategories = (customCatsJson as List).map((jsonStr) {
+      final map = jsonDecode(jsonStr);
+      return AppCategory(
+        name: map['name'],
+        icon: IconData(map['iconCodePoint'], fontFamily: 'MaterialIcons'),
+        color: Color(map['colorValue']),
+      );
+    }).toList();
 
     _sortExpenses();
     final newExpenses = await _recurringService.processRecurringExpenses(_expenses);
@@ -100,6 +133,29 @@ class ExpenseProvider with ChangeNotifier {
     _monthlyBudget = budget;
     final settingsBox = await Hive.openBox(_settingsBoxName);
     await settingsBox.put(_monthlyBudgetKey, budget);
+    notifyListeners();
+  }
+
+  Future<void> addCustomCategory(String name, IconData icon, Color color) async {
+    _customCategories.add(AppCategory(name: name, icon: icon, color: color));
+    await _saveCustomCategories();
+  }
+
+  Future<void> removeCustomCategory(String name) async {
+    _customCategories.removeWhere((c) => c.name == name);
+    await _saveCustomCategories();
+  }
+
+  Future<void> _saveCustomCategories() async {
+    final settingsBox = await Hive.openBox(_settingsBoxName);
+    final List<String> jsonList = _customCategories.map((c) {
+      return jsonEncode({
+        'name': c.name,
+        'iconCodePoint': c.icon.codePoint,
+        'colorValue': c.color.value,
+      });
+    }).toList();
+    await settingsBox.put(_customCategoriesKey, jsonList);
     notifyListeners();
   }
 
@@ -138,6 +194,7 @@ class ExpenseProvider with ChangeNotifier {
     _defaultCurrency = _fallbackCurrency;
     _appPin = null;
     _monthlyBudget = 0.0;
+    _customCategories.clear();
     final settingsBox = await Hive.openBox(_settingsBoxName);
     await settingsBox.clear();
     notifyListeners();

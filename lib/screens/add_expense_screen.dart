@@ -54,7 +54,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
         _customCurrencyController.text = expense.currency;
       }
       // Check if category is a standard one or custom
-      if (AppConstants.expenseCategories.contains(expense.category)) {
+      final provider2 = Provider.of<ExpenseProvider>(context, listen: false);
+      if (provider2.expenseCategories.contains(expense.category)) {
         _selectedCategory = expense.category;
       } else {
         _selectedCategory = 'Other';
@@ -298,6 +299,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       ),
     );
 
+    final provider = Provider.of<ExpenseProvider>(context, listen: false);
     final categoryField = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -311,7 +313,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: AppConstants.categories.map((cat) {
+          children: provider.allCategories.map((cat) {
             final isSelected = _selectedCategory == cat.name;
             return ChoiceChip(
               label: Text(cat.name),
