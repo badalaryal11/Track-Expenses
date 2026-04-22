@@ -30,29 +30,34 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [ChangeNotifierProvider(create: (_) => ExpenseProvider())],
-      child: MaterialApp(
-        title: 'My Expense',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.teal,
-            brightness: Brightness.light,
-          ),
-          textTheme: GoogleFonts.poppinsTextTheme(
-            ThemeData(brightness: Brightness.light).textTheme,
-          ),
-          useMaterial3: true,
-        ),
-        darkTheme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.teal,
-            brightness: Brightness.dark,
-          ),
-          textTheme: GoogleFonts.poppinsTextTheme(
-            ThemeData(brightness: Brightness.dark).textTheme,
-          ),
-          useMaterial3: true,
-        ),
-        home: const InitWrapper(),
+      child: Consumer<ExpenseProvider>(
+        builder: (context, provider, _) {
+          return MaterialApp(
+            title: 'My Expense',
+            themeMode: provider.themeMode,
+            theme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: Colors.teal,
+                brightness: Brightness.light,
+              ),
+              textTheme: GoogleFonts.poppinsTextTheme(
+                ThemeData(brightness: Brightness.light).textTheme,
+              ),
+              useMaterial3: true,
+            ),
+            darkTheme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: Colors.teal,
+                brightness: Brightness.dark,
+              ),
+              textTheme: GoogleFonts.poppinsTextTheme(
+                ThemeData(brightness: Brightness.dark).textTheme,
+              ),
+              useMaterial3: true,
+            ),
+            home: const InitWrapper(),
+          );
+        },
       ),
     );
   }

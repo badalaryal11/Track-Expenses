@@ -457,6 +457,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 const SizedBox(height: 16),
                 ListTile(
+                  leading: Icon(
+                    provider.themeMode == ThemeMode.dark
+                        ? Icons.dark_mode
+                        : provider.themeMode == ThemeMode.light
+                            ? Icons.light_mode
+                            : Icons.brightness_auto,
+                  ),
+                  title: const Text('Appearance'),
+                  subtitle: Text(
+                    provider.themeMode == ThemeMode.dark
+                        ? 'Dark Mode'
+                        : provider.themeMode == ThemeMode.light
+                            ? 'Light Mode'
+                            : 'System Default',
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.of(ctx).pop();
+                    _showThemeModeDialog(context, provider);
+                  },
+                ),
+                const Divider(height: 1),
+                ListTile(
                   leading: const Icon(Icons.currency_exchange),
                   title: const Text('Default Currency'),
                   subtitle: Text('Currently: ${provider.defaultCurrency}'),
@@ -528,6 +551,59 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             ),
           ),
+        );
+      },
+    );
+  }
+  void _showThemeModeDialog(BuildContext context, ExpenseProvider provider) {
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text('Appearance'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ListTile(
+                    title: const Text('System Default'),
+                    subtitle: const Text('Follow device setting'),
+                    leading: const Icon(Icons.brightness_auto),
+                    trailing: provider.themeMode == ThemeMode.system ? const Icon(Icons.check, color: Colors.teal) : null,
+                    onTap: () {
+                      provider.setThemeMode(ThemeMode.system);
+                      setDialogState(() {});
+                    },
+                  ),
+                  ListTile(
+                    title: const Text('Light Mode'),
+                    leading: const Icon(Icons.light_mode),
+                    trailing: provider.themeMode == ThemeMode.light ? const Icon(Icons.check, color: Colors.teal) : null,
+                    onTap: () {
+                      provider.setThemeMode(ThemeMode.light);
+                      setDialogState(() {});
+                    },
+                  ),
+                  ListTile(
+                    title: const Text('Dark Mode'),
+                    leading: const Icon(Icons.dark_mode),
+                    trailing: provider.themeMode == ThemeMode.dark ? const Icon(Icons.check, color: Colors.teal) : null,
+                    onTap: () {
+                      provider.setThemeMode(ThemeMode.dark);
+                      setDialogState(() {});
+                    },
+                  ),
+                ],
+              ),
+              actions: [
+                FilledButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  child: const Text('Done'),
+                ),
+              ],
+            );
+          },
         );
       },
     );

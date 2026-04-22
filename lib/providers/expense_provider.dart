@@ -17,6 +17,7 @@ class ExpenseProvider with ChangeNotifier {
   static const _appPinKey = 'appPin';
   static const _monthlyBudgetKey = 'monthlyBudget';
   static const _customCategoriesKey = 'customCategories';
+  static const _themeModeKey = 'themeMode';
   static const _fallbackCurrency = 'NPR';
 
   List<Expense> _expenses = [];
@@ -24,11 +25,13 @@ class ExpenseProvider with ChangeNotifier {
   String _defaultCurrency = _fallbackCurrency;
   String? _appPin;
   double _monthlyBudget = 0.0;
+  ThemeMode _themeMode = ThemeMode.system;
 
   List<Expense> get expenses => _expenses;
   String get defaultCurrency => _defaultCurrency;
   String? get appPin => _appPin;
   double get monthlyBudget => _monthlyBudget;
+  ThemeMode get themeMode => _themeMode;
   bool get hasPinSetup => _appPin != null && _appPin!.isNotEmpty;
 
   List<AppCategory> get allCategories => [...AppConstants.categories, ..._customCategories];
@@ -95,6 +98,8 @@ class ExpenseProvider with ChangeNotifier {
     _defaultCurrency = settingsBox.get(_defaultCurrencyKey, defaultValue: _fallbackCurrency);
     _appPin = settingsBox.get(_appPinKey);
     _monthlyBudget = settingsBox.get(_monthlyBudgetKey, defaultValue: 0.0);
+    final savedThemeMode = settingsBox.get(_themeModeKey, defaultValue: 'system');
+    _themeMode = _themeModeFromString(savedThemeMode);
     
     final customCatsJson = settingsBox.get(_customCategoriesKey, defaultValue: <String>[]);
     _customCategories = (customCatsJson as List).map((jsonStr) {
@@ -120,6 +125,29 @@ class ExpenseProvider with ChangeNotifier {
     final settingsBox = await Hive.openBox(_settingsBoxName);
     await settingsBox.put(_defaultCurrencyKey, currency);
     notifyListeners();
+  }
+
+  Future<void> setThemeMode(ThemeMode mode) async {
+    _themeMode = mode;
+    final settingsBox = await Hive.openBox(_settingsBoxName);
+    await settingsBox.put(_themeModeKey, _themeModeToString(mode));
+    notifyListeners();
+  }
+
+  static ThemeMode _themeModeFromString(String value) {
+    switch (value) {
+      case 'light': return ThemeMode.light;
+      case 'dark': return ThemeMode.dark;
+      default: return ThemeMode.system;
+    }
+  }
+
+  static String _themeModeToString(ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.light: return 'light';
+      case ThemeMode.dark: return 'dark';
+      case ThemeMode.system: return 'system';
+    }
   }
 
   Future<void> setAppPin(String pin) async {
@@ -152,7 +180,7 @@ class ExpenseProvider with ChangeNotifier {
       return jsonEncode({
         'name': c.name,
         'iconCodePoint': c.icon.codePoint,
-        'colorValue': c.color.value,
+        'colorValue': c.color.toARGB32(),
       });
     }).toList();
     await settingsBox.put(_customCategoriesKey, jsonList);
@@ -195,6 +223,7 @@ class ExpenseProvider with ChangeNotifier {
     _appPin = null;
     _monthlyBudget = 0.0;
     _customCategories.clear();
+    _themeMode = ThemeMode.system;
     final settingsBox = await Hive.openBox(_settingsBoxName);
     await settingsBox.clear();
     notifyListeners();

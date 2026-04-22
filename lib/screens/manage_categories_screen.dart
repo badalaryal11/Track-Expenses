@@ -133,7 +133,7 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
                             height: 40,
                             decoration: BoxDecoration(
                               color: isSelected
-                                  ? selectedColor.withOpacity(0.2)
+                                  ? selectedColor.withValues(alpha: 0.2)
                                   : Theme.of(context).colorScheme.surfaceContainerHighest,
                               borderRadius: BorderRadius.circular(8),
                               border: isSelected
@@ -191,7 +191,7 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               CircleAvatar(
-                                backgroundColor: selectedColor.withOpacity(0.15),
+                                backgroundColor: selectedColor.withValues(alpha: 0.15),
                                 child: Icon(selectedIcon, color: selectedColor),
                               ),
                               const SizedBox(width: 12),
