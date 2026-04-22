@@ -298,17 +298,42 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       ),
     );
 
-    final categoryField = CustomDropdownField(
-      label: 'Category',
-      value: _selectedCategory,
-      items: AppConstants.expenseCategories,
-      prefixIcon: Icons.category,
-      onChanged: (value) {
-        if (value == null) return;
-        setState(() {
-          _selectedCategory = value;
-        });
-      },
+    final categoryField = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Category',
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: AppConstants.categories.map((cat) {
+            final isSelected = _selectedCategory == cat.name;
+            return ChoiceChip(
+              label: Text(cat.name),
+              avatar: Icon(cat.icon, color: isSelected ? Colors.white : cat.color, size: 18),
+              selected: isSelected,
+              selectedColor: cat.color,
+              showCheckmark: false,
+              labelStyle: TextStyle(
+                color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurface,
+                fontWeight: isSelected ? FontWeight.bold : null,
+              ),
+              onSelected: (selected) {
+                if (selected) {
+                  setState(() {
+                    _selectedCategory = cat.name;
+                  });
+                }
+              },
+            );
+          }).toList(),
+        ),
+      ],
     );
 
     final customCategoryField = _selectedCategory == 'Other'

@@ -1,6 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:track_expenses/widgets/expense_list.dart';
+import 'package:track_expenses/constants/app_constants.dart';
 
 class CategoryChart extends StatelessWidget {
   final Map<String, double> categoryTotals;
@@ -43,7 +43,7 @@ class CategoryChart extends StatelessWidget {
                         sections: entries.map((entry) {
                           final percentage = (entry.value / total * 100);
                           final color =
-                              ExpenseList.getCategoryColor(entry.key);
+                              AppConstants.getCategoryColor(entry.key);
                           return PieChartSectionData(
                             value: entry.value,
                             color: color,
@@ -67,7 +67,7 @@ class CategoryChart extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: entries.map((entry) {
                         final color =
-                            ExpenseList.getCategoryColor(entry.key);
+                            AppConstants.getCategoryColor(entry.key);
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 3),
                           child: Row(

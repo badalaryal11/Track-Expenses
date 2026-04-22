@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:track_expenses/providers/expense_provider.dart';
 import 'package:track_expenses/screens/add_expense_screen.dart';
 import 'package:track_expenses/models/expense.dart';
+import 'package:track_expenses/constants/app_constants.dart';
 
 class ExpenseList extends StatelessWidget {
   final ScrollPhysics? physics;
@@ -57,7 +58,7 @@ class ExpenseList extends StatelessWidget {
           itemCount: expenses.length,
           itemBuilder: (context, index) {
             final expense = expenses[index];
-            final categoryColor = _getCategoryColor(expense.category);
+            final categoryColor = AppConstants.getCategoryColor(expense.category);
             return Dismissible(
               key: ValueKey(expense.id),
               direction: DismissDirection.endToStart,
@@ -110,7 +111,7 @@ class ExpenseList extends StatelessWidget {
                   leading: CircleAvatar(
                     backgroundColor: categoryColor.withValues(alpha: 0.15),
                     child: Icon(
-                      _getCategoryIcon(expense.category),
+                      AppConstants.getCategoryIcon(expense.category),
                       color: categoryColor,
                     ),
                   ),
@@ -135,41 +136,4 @@ class ExpenseList extends StatelessWidget {
     );
   }
 
-  static Color getCategoryColor(String category) {
-    return _getCategoryColorStatic(category);
-  }
-
-  static Color _getCategoryColorStatic(String category) {
-    switch (category.toLowerCase()) {
-      case 'food':
-        return Colors.orange;
-      case 'travel':
-        return Colors.blue;
-      case 'leisure':
-        return Colors.purple;
-      case 'work':
-        return Colors.green;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  Color _getCategoryColor(String category) {
-    return _getCategoryColorStatic(category);
-  }
-
-  IconData _getCategoryIcon(String category) {
-    switch (category.toLowerCase()) {
-      case 'food':
-        return Icons.fastfood;
-      case 'travel':
-        return Icons.flight;
-      case 'leisure':
-        return Icons.movie;
-      case 'work':
-        return Icons.work;
-      default:
-        return Icons.attach_money;
-    }
-  }
 }

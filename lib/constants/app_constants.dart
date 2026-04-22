@@ -1,3 +1,17 @@
+import 'package:flutter/material.dart';
+
+class AppCategory {
+  final String name;
+  final IconData icon;
+  final Color color;
+
+  const AppCategory({
+    required this.name,
+    required this.icon,
+    required this.color,
+  });
+}
+
 class AppConstants {
   static const quotes = [
     'Financial freedom starts with small steps!',
@@ -16,7 +30,31 @@ class AppConstants {
 
   static const dashboardViews = ['Daily', 'Weekly', 'Monthly'];
 
-  static const expenseCategories = ['Food', 'Travel', 'Leisure', 'Work', 'Other'];
+  static const List<AppCategory> categories = [
+    AppCategory(name: 'Food', icon: Icons.fastfood, color: Colors.orange),
+    AppCategory(name: 'Travel', icon: Icons.flight, color: Colors.blue),
+    AppCategory(name: 'Leisure', icon: Icons.movie, color: Colors.purple),
+    AppCategory(name: 'Work', icon: Icons.work, color: Colors.green),
+    AppCategory(name: 'Other', icon: Icons.attach_money, color: Colors.grey),
+  ];
+
+  static List<String> get expenseCategories => categories.map((c) => c.name).toList();
+
+  static Color getCategoryColor(String categoryName) {
+    final category = categories.firstWhere(
+      (c) => c.name.toLowerCase() == categoryName.toLowerCase(),
+      orElse: () => const AppCategory(name: 'Other', icon: Icons.attach_money, color: Colors.grey),
+    );
+    return category.color;
+  }
+
+  static IconData getCategoryIcon(String categoryName) {
+    final category = categories.firstWhere(
+      (c) => c.name.toLowerCase() == categoryName.toLowerCase(),
+      orElse: () => const AppCategory(name: 'Other', icon: Icons.attach_money, color: Colors.grey),
+    );
+    return category.icon;
+  }
 
   static const currencies = [
     'NPR',
