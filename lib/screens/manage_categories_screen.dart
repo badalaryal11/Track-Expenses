@@ -11,68 +11,10 @@ class ManageCategoriesScreen extends StatefulWidget {
 }
 
 class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
-  static const List<IconData> _availableIcons = [
-    Icons.restaurant,
-    Icons.local_cafe,
-    Icons.shopping_bag,
-    Icons.shopping_cart,
-    Icons.home,
-    Icons.pets,
-    Icons.fitness_center,
-    Icons.school,
-    Icons.medical_services,
-    Icons.child_care,
-    Icons.phone_android,
-    Icons.local_gas_station,
-    Icons.electric_bolt,
-    Icons.water_drop,
-    Icons.wifi,
-    Icons.subscriptions,
-    Icons.card_giftcard,
-    Icons.celebration,
-    Icons.local_laundry_service,
-    Icons.spa,
-    Icons.sports_esports,
-    Icons.music_note,
-    Icons.book,
-    Icons.local_parking,
-    Icons.directions_bus,
-    Icons.directions_car,
-    Icons.local_taxi,
-    Icons.train,
-    Icons.local_hospital,
-    Icons.storefront,
-    Icons.handyman,
-    Icons.savings,
-    Icons.volunteer_activism,
-    Icons.checkroom,
-  ];
-
-  static final List<Color> _availableColors = [
-    Colors.red,
-    Colors.pink,
-    Colors.deepOrange,
-    Colors.orange,
-    Colors.amber,
-    Colors.yellow,
-    Colors.lime,
-    Colors.lightGreen,
-    Colors.green,
-    Colors.teal,
-    Colors.cyan,
-    Colors.lightBlue,
-    Colors.blue,
-    Colors.indigo,
-    Colors.deepPurple,
-    Colors.purple,
-    Colors.brown,
-    Colors.blueGrey,
-  ];
-
   void _showAddCategoryDialog() {
     final nameController = TextEditingController();
-    IconData selectedIcon = _availableIcons.first;
-    Color selectedColor = _availableColors.first;
+    IconData selectedIcon = AppConstants.availableIcons.first;
+    Color selectedColor = AppConstants.availableColors.first;
 
     showModalBottomSheet(
       context: context,
@@ -122,7 +64,7 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
-                      children: _availableIcons.map((icon) {
+                      children: AppConstants.availableIcons.map((icon) {
                         final isSelected = selectedIcon == icon;
                         return GestureDetector(
                           onTap: () {
@@ -158,7 +100,7 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
-                      children: _availableColors.map((color) {
+                      children: AppConstants.availableColors.map((color) {
                         final isSelected = selectedColor == color;
                         return GestureDetector(
                           onTap: () {

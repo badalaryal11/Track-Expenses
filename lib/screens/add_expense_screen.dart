@@ -24,6 +24,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   DateTime? _selectedDate;
   String _selectedCategory = 'Food';
   late String _selectedCurrency;
+  String _selectedAccount = 'Cash';
   String _recurrenceInterval = 'None'; 
 
   bool get _isEditing => widget.expenseToEdit != null;
@@ -61,6 +62,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
         _selectedCategory = 'Other';
         _customCategoryController.text = expense.category;
       }
+      _selectedAccount = expense.account;
       _recurrenceInterval = expense.recurrenceInterval;
     }
   }
@@ -205,6 +207,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
           ? _customCategoryController.text
           : _selectedCategory,
       currency: currency,
+      account: _selectedAccount,
       isRecurring: isRecurring,
       recurrenceInterval: _recurrenceInterval,
       nextRecurrenceDate: nextRecurrenceDate,
@@ -264,6 +267,19 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
           ),
         ),
       ],
+    );
+
+    final accountField = CustomDropdownField(
+      label: 'Account',
+      value: _selectedAccount,
+      items: AppConstants.accounts,
+      prefixIcon: Icons.account_balance_wallet,
+      onChanged: (value) {
+        if (value == null) return;
+        setState(() {
+          _selectedAccount = value;
+        });
+      },
     );
 
     final customCurrencyField = _selectedCurrency == 'Other'
@@ -402,6 +418,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                               const SizedBox(height: 16),
                               amountRow,
                               customCurrencyField,
+                              const SizedBox(height: 16),
+                              accountField,
                             ],
                           ),
                         ),
@@ -453,6 +471,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                             const SizedBox(height: 16),
                             amountRow,
                             customCurrencyField,
+                            const SizedBox(height: 16),
+                            accountField,
                             const SizedBox(height: 16),
                             dateField,
                             const SizedBox(height: 16),

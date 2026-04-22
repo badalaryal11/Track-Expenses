@@ -118,7 +118,7 @@ class ExpenseList extends StatelessWidget {
                     expense.title,
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  subtitle: Text(DateFormat.yMMMd().format(expense.date)),
+                  subtitle: Text('${expense.account} • ${DateFormat.yMMMd().format(expense.date)}'),
                   trailing: Text(
                     '${expense.currency} ${expense.amount.toStringAsFixed(2)}',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(

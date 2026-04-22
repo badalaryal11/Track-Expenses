@@ -106,7 +106,10 @@ class ExpenseProvider with ChangeNotifier {
       final map = jsonDecode(jsonStr);
       return AppCategory(
         name: map['name'],
-        icon: IconData(map['iconCodePoint'], fontFamily: 'MaterialIcons'),
+        icon: AppConstants.availableIcons.firstWhere(
+          (icon) => icon.codePoint == map['iconCodePoint'],
+          orElse: () => Icons.category,
+        ),
         color: Color(map['colorValue']),
       );
     }).toList();

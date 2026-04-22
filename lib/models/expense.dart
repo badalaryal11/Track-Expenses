@@ -31,6 +31,9 @@ class Expense extends HiveObject {
   @HiveField(8, defaultValue: null)
   DateTime? nextRecurrenceDate;
 
+  @HiveField(9, defaultValue: 'Cash')
+  final String account; // 'Cash', 'Bank Account', 'Credit Card', etc.
+
   Expense({
     required this.id,
     required this.title,
@@ -41,5 +44,6 @@ class Expense extends HiveObject {
     this.isRecurring = false,
     this.recurrenceInterval = 'None',
     this.nextRecurrenceDate,
+    this.account = 'Cash',
   });
 }

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:track_expenses/models/expense.dart';
 import 'package:track_expenses/providers/expense_provider.dart';
 import 'package:track_expenses/widgets/expense_list.dart';
+import 'package:track_expenses/constants/app_constants.dart';
 
 class AllTransactionsScreen extends StatefulWidget {
   const AllTransactionsScreen({super.key});
@@ -17,6 +18,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
   String _searchQuery = '';
   String? _selectedCategory;
   String? _selectedCurrency;
+  String? _selectedAccount;
   String _selectedSort = 'Date (Newest First)';
   final List<String> _sortOptions = [
     'Date (Newest First)', 
@@ -137,6 +139,30 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                       );
                     },
                   ),
+                  const SizedBox(height: 16),
+                  
+                  // Account Filter
+                  InputDecorator(
+                    decoration: const InputDecoration(
+                      labelText: 'Account', 
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.account_balance_wallet),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String?>(
+                        value: _selectedAccount,
+                        isDense: true,
+                        items: [
+                          const DropdownMenuItem(value: null, child: Text('All Accounts')),
+                          ...AppConstants.accounts.map((a) => DropdownMenuItem(value: a, child: Text(a))),
+                        ],
+                        onChanged: (val) {
+                          setModalState(() { _selectedAccount = val; });
+                          setState(() { _selectedAccount = val; });
+                        },
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 32),
                   ElevatedButton(
                     onPressed: () => Navigator.of(ctx).pop(),
@@ -163,7 +189,8 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
       bool matchesTitle = _searchQuery.isEmpty || expense.title.toLowerCase().contains(_searchQuery.toLowerCase());
       bool matchesCategory = _selectedCategory == null || expense.category == _selectedCategory;
       bool matchesCurrency = _selectedCurrency == null || expense.currency == _selectedCurrency;
-      return matchesTitle && matchesCategory && matchesCurrency;
+      bool matchesAccount = _selectedAccount == null || expense.account == _selectedAccount;
+      return matchesTitle && matchesCategory && matchesCurrency && matchesAccount;
     }).toList();
 
     filtered.sort((a, b) {
@@ -217,7 +244,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
             icon: Stack(
               children: [
                 const Icon(Icons.filter_list),
-                if (_selectedCategory != null || _selectedCurrency != null || _selectedSort != 'Date (Newest First)')
+                if (_selectedCategory != null || _selectedCurrency != null || _selectedAccount != null || _selectedSort != 'Date (Newest First)')
                   Positioned(
                     right: 0,
                     top: 0,
