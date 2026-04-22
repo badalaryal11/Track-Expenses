@@ -13,15 +13,18 @@ class ExpenseProvider with ChangeNotifier {
   static const _settingsBoxName = 'settings';
   static const _defaultCurrencyKey = 'defaultCurrency';
   static const _appPinKey = 'appPin';
+  static const _monthlyBudgetKey = 'monthlyBudget';
   static const _fallbackCurrency = 'NPR';
 
   List<Expense> _expenses = [];
   String _defaultCurrency = _fallbackCurrency;
   String? _appPin;
+  double _monthlyBudget = 0.0;
 
   List<Expense> get expenses => _expenses;
   String get defaultCurrency => _defaultCurrency;
   String? get appPin => _appPin;
+  double get monthlyBudget => _monthlyBudget;
   bool get hasPinSetup => _appPin != null && _appPin!.isNotEmpty;
 
   ExpenseProvider() {
@@ -68,6 +71,7 @@ class ExpenseProvider with ChangeNotifier {
     final settingsBox = await Hive.openBox(_settingsBoxName);
     _defaultCurrency = settingsBox.get(_defaultCurrencyKey, defaultValue: _fallbackCurrency);
     _appPin = settingsBox.get(_appPinKey);
+    _monthlyBudget = settingsBox.get(_monthlyBudgetKey, defaultValue: 0.0);
 
     _sortExpenses();
     final newExpenses = await _recurringService.processRecurringExpenses(_expenses);
@@ -89,6 +93,13 @@ class ExpenseProvider with ChangeNotifier {
     _appPin = pin;
     final settingsBox = await Hive.openBox(_settingsBoxName);
     await settingsBox.put(_appPinKey, pin);
+    notifyListeners();
+  }
+
+  Future<void> setMonthlyBudget(double budget) async {
+    _monthlyBudget = budget;
+    final settingsBox = await Hive.openBox(_settingsBoxName);
+    await settingsBox.put(_monthlyBudgetKey, budget);
     notifyListeners();
   }
 
@@ -126,6 +137,7 @@ class ExpenseProvider with ChangeNotifier {
     _expenses.clear();
     _defaultCurrency = _fallbackCurrency;
     _appPin = null;
+    _monthlyBudget = 0.0;
     final settingsBox = await Hive.openBox(_settingsBoxName);
     await settingsBox.clear();
     notifyListeners();

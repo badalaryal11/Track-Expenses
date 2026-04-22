@@ -159,6 +159,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           selectedView: _selectedView,
                           currentTotal: currentTotal,
                           currentQuote: _currentQuote,
+                          monthlyBudget: expenseProvider.monthlyBudget,
                           isPortrait: false,
                         ),
 
@@ -234,6 +235,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     selectedView: _selectedView,
                     currentTotal: currentTotal,
                     currentQuote: _currentQuote,
+                    monthlyBudget: expenseProvider.monthlyBudget,
                     isPortrait: true,
                   ),
 
@@ -463,6 +465,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   },
                 ),
                 const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.track_changes),
+                  title: const Text('Monthly Budget'),
+                  subtitle: Text(provider.monthlyBudget > 0 ? 'Set to ${provider.defaultCurrency} ${provider.monthlyBudget.toStringAsFixed(0)}' : 'Not set'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.of(ctx).pop();
+                    _showSetBudgetDialog(context, provider);
+                  },
+                ),
                 const Divider(height: 1),
                 ListTile(
                   leading: const Icon(Icons.pin),
@@ -500,6 +512,57 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ],
             ),
           ),
+        );
+      },
+    );
+  }
+
+  void _showSetBudgetDialog(BuildContext context, ExpenseProvider provider) {
+    final controller = TextEditingController(
+      text: provider.monthlyBudget > 0 ? provider.monthlyBudget.toStringAsFixed(0) : '',
+    );
+    
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: const Text('Set Monthly Budget'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Set a target limit for your monthly spending. Enter 0 to disable.',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: controller,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: 'Amount',
+                  prefixText: '${provider.defaultCurrency} ',
+                  border: const OutlineInputBorder(),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () {
+                final val = double.tryParse(controller.text) ?? 0.0;
+                provider.setMonthlyBudget(val);
+                Navigator.of(ctx).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(val > 0 ? 'Monthly budget set to ${provider.defaultCurrency} ${val.toStringAsFixed(0)}' : 'Monthly budget disabled')),
+                );
+              },
+              child: const Text('Save'),
+            ),
+          ],
         );
       },
     );

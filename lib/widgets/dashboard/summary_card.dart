@@ -7,6 +7,7 @@ class SummaryCard extends StatelessWidget {
   final String selectedView;
   final double currentTotal;
   final String currentQuote;
+  final double monthlyBudget;
   final bool isPortrait;
 
   const SummaryCard({
@@ -17,6 +18,7 @@ class SummaryCard extends StatelessWidget {
     required this.selectedView,
     required this.currentTotal,
     required this.currentQuote,
+    required this.monthlyBudget,
     this.isPortrait = false,
   });
 
@@ -84,6 +86,53 @@ class SummaryCard extends StatelessWidget {
                     ),
               ),
             ),
+            if (selectedView == 'Monthly' && monthlyBudget > 0) ...[
+              const SizedBox(height: 16),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Budget: $selectedCurrency ${monthlyBudget.toStringAsFixed(0)}',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      Text(
+                        '${(currentTotal / monthlyBudget * 100).clamp(0, 100).toStringAsFixed(1)}%',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: currentTotal > monthlyBudget ? Colors.red : null,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: (currentTotal / monthlyBudget).clamp(0.0, 1.0),
+                      minHeight: 8,
+                      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        currentTotal > monthlyBudget ? Colors.red : Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                  if (currentTotal > monthlyBudget) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      'Over budget by $selectedCurrency ${(currentTotal - monthlyBudget).toStringAsFixed(2)}!',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ],
+              ),
+            ],
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(8),
