@@ -131,8 +131,10 @@ class _SearchScreenState extends State<SearchScreen> {
 
   List<Expense> _getFilteredExpenses(List<Expense> allExpenses) {
     return allExpenses.where((expense) {
-      // Title match
-      bool matchesTitle = _searchQuery.isEmpty || expense.title.toLowerCase().contains(_searchQuery.toLowerCase());
+      // Title or notes match
+      bool matchesTitle = _searchQuery.isEmpty || 
+          expense.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          (expense.notes?.toLowerCase().contains(_searchQuery.toLowerCase()) ?? false);
       
       // Category match
       bool matchesCategory = _selectedCategory == null || expense.category == _selectedCategory;

@@ -118,7 +118,22 @@ class ExpenseList extends StatelessWidget {
                     expense.title,
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  subtitle: Text('${expense.account} • ${DateFormat.yMMMd().format(expense.date)}'),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('${expense.account} • ${DateFormat.yMMMd().format(expense.date)}'),
+                      if (expense.notes != null && expense.notes!.isNotEmpty)
+                        Text(
+                          expense.notes!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                    ],
+                  ),
                   trailing: Text(
                     '${expense.currency} ${expense.amount.toStringAsFixed(2)}',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(

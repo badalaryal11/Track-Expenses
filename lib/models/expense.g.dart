@@ -27,13 +27,14 @@ class ExpenseAdapter extends TypeAdapter<Expense> {
       recurrenceInterval: fields[7] == null ? 'None' : fields[7] as String,
       nextRecurrenceDate: fields[8] as DateTime?,
       account: fields[9] == null ? 'Cash' : fields[9] as String,
+      notes: fields[10] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, Expense obj) {
     writer
-      ..writeByte(10)
+      ..writeByte(11)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -53,7 +54,9 @@ class ExpenseAdapter extends TypeAdapter<Expense> {
       ..writeByte(8)
       ..write(obj.nextRecurrenceDate)
       ..writeByte(9)
-      ..write(obj.account);
+      ..write(obj.account)
+      ..writeByte(10)
+      ..write(obj.notes);
   }
 
   @override

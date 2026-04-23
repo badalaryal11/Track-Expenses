@@ -11,7 +11,7 @@ class ExportService {
     List<List<dynamic>> rows = [];
 
     // Add Header
-    rows.add(["Date", "Title", "Amount", "Category", "Currency", "Recurring", "Repeat Cycle"]);
+    rows.add(["Date", "Title", "Amount", "Category", "Currency", "Account", "Recurring", "Repeat Cycle", "Notes"]);
 
     // Add Data
     for (var expense in expenses) {
@@ -21,8 +21,10 @@ class ExportService {
         expense.amount,
         expense.category,
         expense.currency,
+        expense.account,
         expense.isRecurring,
         expense.recurrenceInterval,
+        expense.notes ?? '',
       ]);
     }
 

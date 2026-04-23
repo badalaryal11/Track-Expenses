@@ -60,7 +60,7 @@ class ExpenseProvider with ChangeNotifier {
 
   // --- Search Functionality ---
 
-  /// Searches expenses by title (case-insensitive, partial match).
+  /// Searches expenses by title or notes (case-insensitive, partial match).
   /// Returns a list of matching expenses.
   List<Expense> searchExpenses(String query) {
     if (query.isEmpty) {
@@ -69,11 +69,12 @@ class ExpenseProvider with ChangeNotifier {
     
     final lowerQuery = query.toLowerCase();
     return _expenses.where((expense) {
-      return expense.title.toLowerCase().contains(lowerQuery);
+      return expense.title.toLowerCase().contains(lowerQuery) || 
+             (expense.notes?.toLowerCase().contains(lowerQuery) ?? false);
     }).toList();
   }
 
-  /// Searches expenses by title and category (case-insensitive, partial match).
+  /// Searches expenses by title/notes and category (case-insensitive, partial match).
   /// Returns a list of matching expenses.
   List<Expense> searchExpensesWithCategory(String query, String category) {
     if (query.isEmpty && category == 'All') {
@@ -82,9 +83,11 @@ class ExpenseProvider with ChangeNotifier {
     
     final lowerQuery = query.toLowerCase();
     return _expenses.where((expense) {
-      final matchesTitle = query.isEmpty || expense.title.toLowerCase().contains(lowerQuery);
+      final matchesQuery = query.isEmpty || 
+          expense.title.toLowerCase().contains(lowerQuery) ||
+          (expense.notes?.toLowerCase().contains(lowerQuery) ?? false);
       final matchesCategory = category == 'All' || expense.category == category;
-      return matchesTitle && matchesCategory;
+      return matchesQuery && matchesCategory;
     }).toList();
   }
 
@@ -197,7 +200,7 @@ class ExpenseProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  /// Searches expenses by title, category, and currency (case-insensitive, partial match).
+  /// Searches expenses by title/notes, category, and currency (case-insensitive, partial match).
   /// Returns a list of matching expenses.
   List<Expense> searchExpensesWithFilters({
     required String query,
@@ -210,10 +213,12 @@ class ExpenseProvider with ChangeNotifier {
     
     final lowerQuery = query.toLowerCase();
     return _expenses.where((expense) {
-      final matchesTitle = query.isEmpty || expense.title.toLowerCase().contains(lowerQuery);
+      final matchesQuery = query.isEmpty || 
+          expense.title.toLowerCase().contains(lowerQuery) ||
+          (expense.notes?.toLowerCase().contains(lowerQuery) ?? false);
       final matchesCategory = category == null || expense.category == category;
       final matchesCurrency = currency == null || expense.currency == currency;
-      return matchesTitle && matchesCategory && matchesCurrency;
+      return matchesQuery && matchesCategory && matchesCurrency;
     }).toList();
   }
   

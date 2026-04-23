@@ -34,6 +34,9 @@ class Expense extends HiveObject {
   @HiveField(9, defaultValue: 'Cash')
   final String account; // 'Cash', 'Bank Account', 'Credit Card', etc.
 
+  @HiveField(10, defaultValue: null)
+  final String? notes; // Optional notes/description
+
   Expense({
     required this.id,
     required this.title,
@@ -45,5 +48,6 @@ class Expense extends HiveObject {
     this.recurrenceInterval = 'None',
     this.nextRecurrenceDate,
     this.account = 'Cash',
+    this.notes,
   });
 }

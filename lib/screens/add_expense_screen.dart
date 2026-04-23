@@ -21,6 +21,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   final _amountController = TextEditingController();
   final _customCategoryController = TextEditingController();
   final _customCurrencyController = TextEditingController();
+  final _notesController = TextEditingController();
   DateTime? _selectedDate;
   String _selectedCategory = 'Food';
   late String _selectedCurrency;
@@ -64,6 +65,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       }
       _selectedAccount = expense.account;
       _recurrenceInterval = expense.recurrenceInterval;
+      _notesController.text = expense.notes ?? '';
     }
   }
 
@@ -243,6 +245,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       isRecurring: isRecurring,
       recurrenceInterval: _recurrenceInterval,
       nextRecurrenceDate: nextRecurrenceDate,
+      notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
     );
 
     final provider = Provider.of<ExpenseProvider>(context, listen: false);
@@ -430,6 +433,18 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       },
     );
 
+    final notesField = TextField(
+      controller: _notesController,
+      decoration: const InputDecoration(
+        labelText: 'Notes (optional)',
+        hintText: 'e.g. dinner with friends, annual renewal...',
+        border: OutlineInputBorder(),
+        prefixIcon: Icon(Icons.notes),
+      ),
+      maxLines: 2,
+      textCapitalization: TextCapitalization.sentences,
+    );
+
     final submitButton = ElevatedButton(
       onPressed: _submitData,
       style: ElevatedButton.styleFrom(
@@ -491,6 +506,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                   customCategoryField,
                                   const SizedBox(height: 16),
                                   recurrenceField,
+                                  const SizedBox(height: 16),
+                                  notesField,
                                 ],
                               ),
                             ),
@@ -529,6 +546,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                             customCategoryField,
                             const SizedBox(height: 16),
                             recurrenceField,
+                            const SizedBox(height: 16),
+                            notesField,
                           ],
                         ),
                       ),
