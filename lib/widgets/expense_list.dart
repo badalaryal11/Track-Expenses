@@ -71,30 +71,26 @@ class ExpenseList extends StatelessWidget {
                 ),
                 child: const Icon(Icons.delete_forever, color: Colors.white, size: 28),
               ),
-              confirmDismiss: (direction) async {
-                return await showDialog<bool>(
-                  context: context,
-                  builder: (ctx) => AlertDialog(
-                    title: const Text('Delete Expense'),
-                    content: Text(
-                      'Are you sure you want to delete "${expense.title}"?',
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.of(ctx).pop(false),
-                        child: const Text('Cancel'),
-                      ),
-                      TextButton(
-                        onPressed: () => Navigator.of(ctx).pop(true),
-                        style: TextButton.styleFrom(foregroundColor: Colors.red),
-                        child: const Text('Delete'),
-                      ),
-                    ],
-                  ),
-                ) ?? false;
-              },
               onDismissed: (_) {
                 provider.deleteExpense(expense);
+                
+                ScaffoldMessenger.of(context).clearSnackBars();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text('Expense deleted'),
+                    duration: const Duration(seconds: 4),
+                    behavior: SnackBarBehavior.floating,
+                    margin: const EdgeInsets.all(12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    action: SnackBarAction(
+                      label: 'UNDO',
+                      textColor: Theme.of(context).colorScheme.primary,
+                      onPressed: () {
+                        provider.addExpense(expense);
+                      },
+                    ),
+                  ),
+                );
               },
               child: Card(
                 margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),

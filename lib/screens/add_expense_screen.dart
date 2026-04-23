@@ -86,31 +86,29 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
 
   void _deleteExpense() {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Delete Expense'),
-        content: const Text(
-            'Are you sure you want to delete this expense? This action cannot be undone.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(ctx).pop();
-              final provider =
-                  Provider.of<ExpenseProvider>(context, listen: false);
-              provider.deleteExpense(widget.expenseToEdit!);
-              Navigator.of(context).pop();
-            },
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.red,
-            ),
-            child: const Text('Delete'),
-          ),
-        ],
+    final provider = Provider.of<ExpenseProvider>(context, listen: false);
+    final expense = widget.expenseToEdit!;
+    
+    // Perform delete and exit screen
+    provider.deleteExpense(expense);
+    Navigator.of(context).pop();
+
+    // Show undo snackbar on the previous screen
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Expense deleted'),
+        duration: const Duration(seconds: 4),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        action: SnackBarAction(
+          label: 'UNDO',
+          textColor: Theme.of(context).colorScheme.primary,
+          onPressed: () {
+            provider.addExpense(expense);
+          },
+        ),
       ),
     );
   }
