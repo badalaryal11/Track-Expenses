@@ -129,28 +129,60 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     );
   }
 
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.error_outline, color: Colors.white, size: 20),
+            const SizedBox(width: 12),
+            Expanded(child: Text(message)),
+          ],
+        ),
+        backgroundColor: Colors.red.shade600,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        margin: const EdgeInsets.all(12),
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
   void _submitData() {
-    if (_titleController.text.isEmpty ||
-        _amountController.text.isEmpty ||
-        _selectedDate == null) {
-      return; // Show error toast in real app
+    if (_titleController.text.trim().isEmpty) {
+      _showError('Please enter a title for the expense.');
+      return;
     }
 
-    final enteredTitle = _titleController.text;
+    if (_amountController.text.trim().isEmpty) {
+      _showError('Please enter an amount.');
+      return;
+    }
+
+    final enteredTitle = _titleController.text.trim();
     final enteredAmount = double.tryParse(_amountController.text);
 
     if (enteredAmount == null || enteredAmount <= 0) {
-      return; // Show error toast
+      _showError('Please enter a valid amount greater than zero.');
+      return;
+    }
+
+    if (_selectedDate == null) {
+      _showError('Please select a date.');
+      return;
     }
 
     if (_selectedCategory == 'Other' &&
-        _customCategoryController.text.isEmpty) {
-      return; // Show error: user must specify category
+        _customCategoryController.text.trim().isEmpty) {
+      _showError('Please specify a custom category name.');
+      return;
     }
 
     if (_selectedCurrency == 'Other' &&
         _customCurrencyController.text.trim().isEmpty) {
-      return; // Show error: user must specify currency
+      _showError('Please enter a custom currency code.');
+      return;
     }
 
     final currency = _selectedCurrency == 'Other'
@@ -220,6 +252,23 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       provider.addExpense(newExpense);
     }
     Navigator.of(context).pop();
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.check_circle_outline, color: Colors.white, size: 20),
+            const SizedBox(width: 12),
+            Text(_isEditing ? 'Expense updated successfully!' : 'Expense added successfully!'),
+          ],
+        ),
+        backgroundColor: Colors.green.shade600,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        margin: const EdgeInsets.all(12),
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
 
