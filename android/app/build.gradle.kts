@@ -28,7 +28,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.badalaryal.track_expenses"
+        applicationId = "com.badalaryal.myexpense"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
