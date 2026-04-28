@@ -14,7 +14,7 @@ plugins {
 }
 
 android {
-    namespace = "com.badalaryal.track_expenses"
+    namespace = "com.badalaryal.myexpense"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
