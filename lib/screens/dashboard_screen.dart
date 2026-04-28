@@ -60,9 +60,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     final expenseProvider = Provider.of<ExpenseProvider>(context);
     final currencies = expenseProvider.uniqueCurrencies;
-
-    final String currency =
+    final preferredCurrency =
         _selectedCurrency ?? expenseProvider.defaultCurrency;
+    final currenciesForSelector = {...currencies}.toList();
+    if (preferredCurrency.isNotEmpty &&
+        !currenciesForSelector.contains(preferredCurrency)) {
+      currenciesForSelector.insert(0, preferredCurrency);
+    }
+    final String currency = currenciesForSelector.contains(preferredCurrency)
+        ? preferredCurrency
+        : (currenciesForSelector.isNotEmpty
+              ? currenciesForSelector.first
+              : expenseProvider.defaultCurrency);
 
     // Get stats based on selection
     double currentTotal = 0.0;
@@ -156,7 +165,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                         // Summary Card
                         SummaryCard(
-                          currencies: currencies,
+                          currencies: currenciesForSelector,
                           selectedCurrency: currency,
                           onCurrencyChanged: (c) =>
                               setState(() => _selectedCurrency = c),
@@ -238,7 +247,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                   // Summary Card
                   SummaryCard(
-                    currencies: currencies,
+                    currencies: currenciesForSelector,
                     selectedCurrency: currency,
                     onCurrencyChanged: (c) =>
                         setState(() => _selectedCurrency = c),

@@ -25,6 +25,10 @@ class SummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final dropdownCurrencies = {...currencies}.toList();
+    final dropdownValue = dropdownCurrencies.contains(selectedCurrency)
+        ? selectedCurrency
+        : (dropdownCurrencies.isNotEmpty ? dropdownCurrencies.first : null);
     return Card(
       margin: const EdgeInsets.fromLTRB(16, 8, 16, 12),
       color: theme.colorScheme.surfaceContainerHigh,
@@ -42,7 +46,7 @@ class SummaryCard extends StatelessWidget {
                   width: 50,
                   child: Image.asset('assets/icon/app_icon.png'),
                 ),
-                if (currencies.isNotEmpty)
+                if (dropdownCurrencies.isNotEmpty)
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10),
                     decoration: BoxDecoration(
@@ -50,10 +54,10 @@ class SummaryCard extends StatelessWidget {
                       color: theme.colorScheme.surface,
                     ),
                     child: DropdownButton<String>(
-                      value: selectedCurrency,
+                      value: dropdownValue,
                       underline: Container(),
                       icon: const Icon(Icons.arrow_drop_down),
-                      items: currencies.map((String value) {
+                      items: dropdownCurrencies.map((String value) {
                         return DropdownMenuItem<String>(
                           value: value,
                           child: Text(value),

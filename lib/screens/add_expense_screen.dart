@@ -26,9 +26,19 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   String _selectedCategory = 'Food';
   late String _selectedCurrency;
   String _selectedAccount = 'Cash';
-  String _recurrenceInterval = 'None'; 
+  String _recurrenceInterval = 'None';
 
   bool get _isEditing => widget.expenseToEdit != null;
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _amountController.dispose();
+    _customCategoryController.dispose();
+    _customCurrencyController.dispose();
+    _notesController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -84,18 +94,28 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     });
   }
 
-
-  void _deleteExpense() {
+  Future<void> _deleteExpense() async {
     final provider = Provider.of<ExpenseProvider>(context, listen: false);
     final expense = widget.expenseToEdit!;
-    
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    final primaryColor = Theme.of(context).colorScheme.primary;
+
     // Perform delete and exit screen
-    provider.deleteExpense(expense);
-    Navigator.of(context).pop();
+    try {
+      await provider.deleteExpense(expense);
+    } catch (_) {
+      if (mounted) {
+        _showError('Could not delete expense. Please try again.');
+      }
+      return;
+    }
+    if (!mounted) return;
+    navigator.pop();
 
     // Show undo snackbar on the previous screen
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(
+    messenger.clearSnackBars();
+    messenger.showSnackBar(
       SnackBar(
         content: const Text('Expense deleted'),
         duration: const Duration(seconds: 4),
@@ -104,9 +124,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         action: SnackBarAction(
           label: 'UNDO',
-          textColor: Theme.of(context).colorScheme.primary,
-          onPressed: () {
-            provider.addExpense(expense);
+          textColor: primaryColor,
+          onPressed: () async {
+            await provider.addExpense(expense);
           },
         ),
       ),
@@ -115,7 +135,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
   Widget _buildDeleteButton() {
     return ElevatedButton.icon(
-      onPressed: _deleteExpense,
+      onPressed: () => _deleteExpense(),
       icon: const Icon(Icons.delete_outline, color: Colors.white),
       label: const Text(
         'Delete Expense',
@@ -149,7 +169,34 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     );
   }
 
-  void _submitData() {
+  DateTime? _calculateNextRecurrenceDate(DateTime startDate, String interval) {
+    switch (interval) {
+      case 'Daily':
+        return startDate.add(const Duration(days: 1));
+      case 'Weekly':
+        return startDate.add(const Duration(days: 7));
+      case 'Monthly':
+        final targetMonth = startDate.month + 1;
+        final targetYear = targetMonth > 12
+            ? startDate.year + 1
+            : startDate.year;
+        final normalizedMonth = targetMonth > 12
+            ? targetMonth - 12
+            : targetMonth;
+        final daysInMonth = DateTime(targetYear, normalizedMonth + 1, 0).day;
+        final day = startDate.day > daysInMonth ? daysInMonth : startDate.day;
+        return DateTime(targetYear, normalizedMonth, day);
+      case 'Yearly':
+        final targetYear = startDate.year + 1;
+        final daysInMonth = DateTime(targetYear, startDate.month + 1, 0).day;
+        final day = startDate.day > daysInMonth ? daysInMonth : startDate.day;
+        return DateTime(targetYear, startDate.month, day);
+      default:
+        return null;
+    }
+  }
+
+  Future<void> _submitData() async {
     if (_titleController.text.trim().isEmpty) {
       _showError('Please enter a title for the expense.');
       return;
@@ -191,43 +238,21 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
     final isRecurring = _recurrenceInterval != 'None';
     DateTime? nextRecurrenceDate;
-    if (isRecurring && !(_isEditing && widget.expenseToEdit!.isRecurring)) {
-       if (_recurrenceInterval == 'Daily') nextRecurrenceDate = _selectedDate!.add(const Duration(days: 1));
-       if (_recurrenceInterval == 'Weekly') nextRecurrenceDate = _selectedDate!.add(const Duration(days: 7));
-       if (_recurrenceInterval == 'Monthly') {
-         final targetMonth = _selectedDate!.month + 1;
-         final targetYear = targetMonth > 12 ? _selectedDate!.year + 1 : _selectedDate!.year;
-         final normalizedMonth = targetMonth > 12 ? targetMonth - 12 : targetMonth;
-         final daysInMonth = DateTime(targetYear, normalizedMonth + 1, 0).day;
-         final day = _selectedDate!.day > daysInMonth ? daysInMonth : _selectedDate!.day;
-         nextRecurrenceDate = DateTime(targetYear, normalizedMonth, day);
-       }
-       if (_recurrenceInterval == 'Yearly') {
-         final targetYear = _selectedDate!.year + 1;
-         final daysInMonth = DateTime(targetYear, _selectedDate!.month + 1, 0).day;
-         final day = _selectedDate!.day > daysInMonth ? daysInMonth : _selectedDate!.day;
-         nextRecurrenceDate = DateTime(targetYear, _selectedDate!.month, day);
-       }
-    } else if (_isEditing && isRecurring) {
-       nextRecurrenceDate = widget.expenseToEdit?.nextRecurrenceDate;
-       if (nextRecurrenceDate == null) {
-         if (_recurrenceInterval == 'Daily') nextRecurrenceDate = _selectedDate!.add(const Duration(days: 1));
-         if (_recurrenceInterval == 'Weekly') nextRecurrenceDate = _selectedDate!.add(const Duration(days: 7));
-         if (_recurrenceInterval == 'Monthly') {
-         final targetMonth = _selectedDate!.month + 1;
-         final targetYear = targetMonth > 12 ? _selectedDate!.year + 1 : _selectedDate!.year;
-         final normalizedMonth = targetMonth > 12 ? targetMonth - 12 : targetMonth;
-         final daysInMonth = DateTime(targetYear, normalizedMonth + 1, 0).day;
-         final day = _selectedDate!.day > daysInMonth ? daysInMonth : _selectedDate!.day;
-         nextRecurrenceDate = DateTime(targetYear, normalizedMonth, day);
-       }
-         if (_recurrenceInterval == 'Yearly') {
-         final targetYear = _selectedDate!.year + 1;
-         final daysInMonth = DateTime(targetYear, _selectedDate!.month + 1, 0).day;
-         final day = _selectedDate!.day > daysInMonth ? daysInMonth : _selectedDate!.day;
-         nextRecurrenceDate = DateTime(targetYear, _selectedDate!.month, day);
-       }
-       }
+    if (isRecurring) {
+      final editingSameRecurringInterval =
+          _isEditing &&
+          widget.expenseToEdit!.isRecurring &&
+          widget.expenseToEdit!.recurrenceInterval == _recurrenceInterval;
+
+      if (editingSameRecurringInterval &&
+          widget.expenseToEdit!.nextRecurrenceDate != null) {
+        nextRecurrenceDate = widget.expenseToEdit!.nextRecurrenceDate;
+      } else {
+        nextRecurrenceDate = _calculateNextRecurrenceDate(
+          _selectedDate!,
+          _recurrenceInterval,
+        );
+      }
     }
 
     final newExpense = Expense(
@@ -243,24 +268,42 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       isRecurring: isRecurring,
       recurrenceInterval: _recurrenceInterval,
       nextRecurrenceDate: nextRecurrenceDate,
-      notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
+      notes: _notesController.text.trim().isEmpty
+          ? null
+          : _notesController.text.trim(),
     );
 
     final provider = Provider.of<ExpenseProvider>(context, listen: false);
-    if (_isEditing) {
-      provider.updateExpense(widget.expenseToEdit!, newExpense);
-    } else {
-      provider.addExpense(newExpense);
+    try {
+      if (_isEditing) {
+        await provider.updateExpense(widget.expenseToEdit!, newExpense);
+      } else {
+        await provider.addExpense(newExpense);
+      }
+    } catch (_) {
+      if (mounted) {
+        _showError('Could not save expense. Please try again.');
+      }
+      return;
     }
+    if (!mounted) return;
     Navigator.of(context).pop();
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
           children: [
-            const Icon(Icons.check_circle_outline, color: Colors.white, size: 20),
+            const Icon(
+              Icons.check_circle_outline,
+              color: Colors.white,
+              size: 20,
+            ),
             const SizedBox(width: 12),
-            Text(_isEditing ? 'Expense updated successfully!' : 'Expense added successfully!'),
+            Text(
+              _isEditing
+                  ? 'Expense updated successfully!'
+                  : 'Expense added successfully!',
+            ),
           ],
         ),
         backgroundColor: Colors.green.shade600,
@@ -271,7 +314,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       ),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -383,12 +425,18 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
             final isSelected = _selectedCategory == cat.name;
             return ChoiceChip(
               label: Text(cat.name),
-              avatar: Icon(cat.icon, color: isSelected ? Colors.white : cat.color, size: 18),
+              avatar: Icon(
+                cat.icon,
+                color: isSelected ? Colors.white : cat.color,
+                size: 18,
+              ),
               selected: isSelected,
               selectedColor: cat.color,
               showCheckmark: false,
               labelStyle: TextStyle(
-                color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurface,
+                color: isSelected
+                    ? Colors.white
+                    : Theme.of(context).colorScheme.onSurface,
                 fontWeight: isSelected ? FontWeight.bold : null,
               ),
               onSelected: (selected) {
@@ -444,7 +492,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     );
 
     final submitButton = ElevatedButton(
-      onPressed: _submitData,
+      onPressed: () => _submitData(),
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -512,8 +560,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                           ),
                           const SizedBox(height: 24),
                           submitButton,
-                          if (_isEditing) ...
-                          [
+                          if (_isEditing) ...[
                             const SizedBox(height: 12),
                             _buildDeleteButton(),
                           ],
@@ -552,8 +599,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                     ),
                     const SizedBox(height: 24),
                     submitButton,
-                    if (_isEditing) ...
-                    [
+                    if (_isEditing) ...[
                       const SizedBox(height: 12),
                       _buildDeleteButton(),
                     ],
