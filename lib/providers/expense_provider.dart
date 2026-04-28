@@ -34,13 +34,21 @@ class ExpenseProvider with ChangeNotifier {
   ThemeMode get themeMode => _themeMode;
   bool get hasPinSetup => _appPin != null && _appPin!.isNotEmpty;
 
-  List<AppCategory> get allCategories => [...AppConstants.categories, ..._customCategories];
-  List<String> get expenseCategories => allCategories.map((c) => c.name).toList();
+  List<AppCategory> get allCategories => [
+    ...AppConstants.categories,
+    ..._customCategories,
+  ];
+  List<String> get expenseCategories =>
+      allCategories.map((c) => c.name).toList();
 
   Color getCategoryColor(String categoryName) {
     final category = allCategories.firstWhere(
       (c) => c.name.toLowerCase() == categoryName.toLowerCase(),
-      orElse: () => const AppCategory(name: 'Other', icon: Icons.attach_money, color: Colors.grey),
+      orElse: () => const AppCategory(
+        name: 'Other',
+        icon: Icons.attach_money,
+        color: Colors.grey,
+      ),
     );
     return category.color;
   }
@@ -48,7 +56,11 @@ class ExpenseProvider with ChangeNotifier {
   IconData getCategoryIcon(String categoryName) {
     final category = allCategories.firstWhere(
       (c) => c.name.toLowerCase() == categoryName.toLowerCase(),
-      orElse: () => const AppCategory(name: 'Other', icon: Icons.attach_money, color: Colors.grey),
+      orElse: () => const AppCategory(
+        name: 'Other',
+        icon: Icons.attach_money,
+        color: Colors.grey,
+      ),
     );
     return category.icon;
   }
@@ -66,11 +78,11 @@ class ExpenseProvider with ChangeNotifier {
     if (query.isEmpty) {
       return _expenses;
     }
-    
+
     final lowerQuery = query.toLowerCase();
     return _expenses.where((expense) {
-      return expense.title.toLowerCase().contains(lowerQuery) || 
-             (expense.notes?.toLowerCase().contains(lowerQuery) ?? false);
+      return expense.title.toLowerCase().contains(lowerQuery) ||
+          (expense.notes?.toLowerCase().contains(lowerQuery) ?? false);
     }).toList();
   }
 
@@ -80,10 +92,11 @@ class ExpenseProvider with ChangeNotifier {
     if (query.isEmpty && category == 'All') {
       return _expenses;
     }
-    
+
     final lowerQuery = query.toLowerCase();
     return _expenses.where((expense) {
-      final matchesQuery = query.isEmpty || 
+      final matchesQuery =
+          query.isEmpty ||
           expense.title.toLowerCase().contains(lowerQuery) ||
           (expense.notes?.toLowerCase().contains(lowerQuery) ?? false);
       final matchesCategory = category == 'All' || expense.category == category;
@@ -91,39 +104,81 @@ class ExpenseProvider with ChangeNotifier {
     }).toList();
   }
 
-
   Future<void> init() async {
     await _repository.init();
     _expenses = _repository.getAllExpenses();
 
     // Load saved settings
     final settingsBox = await Hive.openBox(_settingsBoxName);
-    _defaultCurrency = settingsBox.get(_defaultCurrencyKey, defaultValue: _fallbackCurrency);
+    _defaultCurrency = settingsBox.get(
+      _defaultCurrencyKey,
+      defaultValue: _fallbackCurrency,
+    );
     _appPin = settingsBox.get(_appPinKey);
     _monthlyBudget = settingsBox.get(_monthlyBudgetKey, defaultValue: 0.0);
-    final savedThemeMode = settingsBox.get(_themeModeKey, defaultValue: 'system');
+    final savedThemeMode = settingsBox.get(
+      _themeModeKey,
+      defaultValue: 'system',
+    );
     _themeMode = _themeModeFromString(savedThemeMode);
-    
-    final customCatsJson = settingsBox.get(_customCategoriesKey, defaultValue: <String>[]);
-    _customCategories = (customCatsJson as List).map((jsonStr) {
-      final map = jsonDecode(jsonStr);
-      return AppCategory(
-        name: map['name'],
-        icon: AppConstants.availableIcons.firstWhere(
-          (icon) => icon.codePoint == map['iconCodePoint'],
-          orElse: () => Icons.category,
-        ),
-        color: Color(map['colorValue']),
-      );
-    }).toList();
+
+    final customCatsJson = settingsBox.get(
+      _customCategoriesKey,
+      defaultValue: <String>[],
+    );
+    _customCategories = _decodeCustomCategories(customCatsJson);
 
     _sortExpenses();
-    final newExpenses = await _recurringService.processRecurringExpenses(_expenses);
+    final newExpenses = await _recurringService.processRecurringExpenses(
+      _expenses,
+    );
     if (newExpenses.isNotEmpty) {
       _expenses.addAll(newExpenses);
       _sortExpenses();
     }
     notifyListeners();
+  }
+
+  List<AppCategory> _decodeCustomCategories(dynamic customCatsJson) {
+    if (customCatsJson is! List) {
+      return [];
+    }
+
+    final categories = <AppCategory>[];
+    for (final entry in customCatsJson) {
+      if (entry is! String) {
+        continue;
+      }
+
+      try {
+        final decoded = jsonDecode(entry);
+        if (decoded is! Map) {
+          continue;
+        }
+
+        final name = decoded['name'];
+        final iconCodePoint = decoded['iconCodePoint'];
+        final colorValue = decoded['colorValue'];
+        if (name is! String || iconCodePoint is! int || colorValue is! int) {
+          continue;
+        }
+
+        categories.add(
+          AppCategory(
+            name: name,
+            icon: AppConstants.availableIcons.firstWhere(
+              (icon) => icon.codePoint == iconCodePoint,
+              orElse: () => Icons.category,
+            ),
+            color: Color(colorValue),
+          ),
+        );
+      } catch (_) {
+        // Skip malformed category records instead of failing app startup.
+      }
+    }
+
+    return categories;
   }
 
   Future<void> setDefaultCurrency(String currency) async {
@@ -142,17 +197,23 @@ class ExpenseProvider with ChangeNotifier {
 
   static ThemeMode _themeModeFromString(String value) {
     switch (value) {
-      case 'light': return ThemeMode.light;
-      case 'dark': return ThemeMode.dark;
-      default: return ThemeMode.system;
+      case 'light':
+        return ThemeMode.light;
+      case 'dark':
+        return ThemeMode.dark;
+      default:
+        return ThemeMode.system;
     }
   }
 
   static String _themeModeToString(ThemeMode mode) {
     switch (mode) {
-      case ThemeMode.light: return 'light';
-      case ThemeMode.dark: return 'dark';
-      case ThemeMode.system: return 'system';
+      case ThemeMode.light:
+        return 'light';
+      case ThemeMode.dark:
+        return 'dark';
+      case ThemeMode.system:
+        return 'system';
     }
   }
 
@@ -170,7 +231,11 @@ class ExpenseProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> addCustomCategory(String name, IconData icon, Color color) async {
+  Future<void> addCustomCategory(
+    String name,
+    IconData icon,
+    Color color,
+  ) async {
     _customCategories.add(AppCategory(name: name, icon: icon, color: color));
     await _saveCustomCategories();
   }
@@ -210,10 +275,11 @@ class ExpenseProvider with ChangeNotifier {
     if (query.isEmpty && category == null && currency == null) {
       return _expenses;
     }
-    
+
     final lowerQuery = query.toLowerCase();
     return _expenses.where((expense) {
-      final matchesQuery = query.isEmpty || 
+      final matchesQuery =
+          query.isEmpty ||
           expense.title.toLowerCase().contains(lowerQuery) ||
           (expense.notes?.toLowerCase().contains(lowerQuery) ?? false);
       final matchesCategory = category == null || expense.category == category;
@@ -221,7 +287,6 @@ class ExpenseProvider with ChangeNotifier {
       return matchesQuery && matchesCategory && matchesCurrency;
     }).toList();
   }
-  
 
   /// Clears all expense data and resets settings.
   Future<void> clearAllData() async {
@@ -448,7 +513,8 @@ class ExpenseProvider with ChangeNotifier {
 
       bool include = false;
       if (view == 'Daily') {
-        include = expense.date.year == now.year &&
+        include =
+            expense.date.year == now.year &&
             expense.date.month == now.month &&
             expense.date.day == now.day;
       } else if (view == 'Weekly') {
@@ -487,19 +553,23 @@ class ExpenseProvider with ChangeNotifier {
   }
 
   /// Returns daily spending broken down by day of the month for the given month and currency.
-  Map<int, double> getDailySpendingForMonth(DateTime monthDate, {String? currency}) {
+  Map<int, double> getDailySpendingForMonth(
+    DateTime monthDate, {
+    String? currency,
+  }) {
     final Map<int, double> spendingByDay = {};
-    
+
     // Find the number of days in the month
     int daysInMonth = DateTime(monthDate.year, monthDate.month + 1, 0).day;
-    
+
     // Initialize all days to 0
-    for(int i = 1; i <= daysInMonth; i++) {
-        spendingByDay[i] = 0.0;
+    for (int i = 1; i <= daysInMonth; i++) {
+      spendingByDay[i] = 0.0;
     }
 
     for (var expense in _expenses) {
-      if (expense.date.year == monthDate.year && expense.date.month == monthDate.month) {
+      if (expense.date.year == monthDate.year &&
+          expense.date.month == monthDate.month) {
         if (currency == null || expense.currency == currency) {
           int day = expense.date.day;
           spendingByDay[day] = (spendingByDay[day] ?? 0) + expense.amount;

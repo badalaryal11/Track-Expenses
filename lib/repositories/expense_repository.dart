@@ -6,7 +6,14 @@ class ExpenseRepository {
 
   /// Opens the Hive box and runs necessary schema migrations automatically.
   Future<void> init() async {
-    _expenseBox = await Hive.openBox<Expense>('expenses');
+    try {
+      _expenseBox = await Hive.openBox<Expense>('expenses');
+    } on HiveError {
+      // Recover from corrupted or incompatible on-device data instead of
+      // crashing app startup.
+      await Hive.deleteBoxFromDisk('expenses');
+      _expenseBox = await Hive.openBox<Expense>('expenses');
+    }
     await _runMigrations();
   }
 

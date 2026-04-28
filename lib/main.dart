@@ -72,6 +72,7 @@ class InitWrapper extends StatefulWidget {
 
 class _InitWrapperState extends State<InitWrapper> {
   bool _isInitialized = false;
+  Object? _initError;
 
   @override
   void initState() {
@@ -79,24 +80,57 @@ class _InitWrapperState extends State<InitWrapper> {
     // Initialize provider
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
-        await Provider.of<ExpenseProvider>(context, listen: false).init();
-        if (mounted) {
-          setState(() {
-            _isInitialized = true;
-          });
-        }
+        await _initialize();
       }
     });
   }
 
+  Future<void> _initialize() async {
+    try {
+      await Provider.of<ExpenseProvider>(context, listen: false).init();
+      if (!mounted) return;
+      setState(() {
+        _isInitialized = true;
+        _initError = null;
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _initError = error;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (!_isInitialized) {
-      return const Scaffold(
+    if (_initError != null) {
+      return Scaffold(
         body: Center(
-          child: CircularProgressIndicator(),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.error_outline, size: 56),
+                const SizedBox(height: 16),
+                const Text(
+                  'Could not load app data.',
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                FilledButton(
+                  onPressed: _initialize,
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
+          ),
         ),
       );
+    }
+
+    if (!_isInitialized) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     return const AuthWrapper(child: DashboardScreen());
   }
