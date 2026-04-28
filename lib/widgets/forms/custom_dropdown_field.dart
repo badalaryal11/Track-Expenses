@@ -21,19 +21,15 @@ class CustomDropdownField extends StatelessWidget {
     return InputDecorator(
       decoration: InputDecoration(
         labelText: label,
-        border: const OutlineInputBorder(),
         prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: value,
-          isDense: true,
+          isExpanded: true,
+          borderRadius: BorderRadius.circular(12),
           items: items.map((item) {
-            return DropdownMenuItem(
-              value: item,
-              child: Text(item),
-            );
+            return DropdownMenuItem(value: item, child: Text(item));
           }).toList(),
           onChanged: onChanged,
         ),

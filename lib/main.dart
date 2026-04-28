@@ -43,6 +43,39 @@ class MyApp extends StatelessWidget {
               textTheme: GoogleFonts.poppinsTextTheme(
                 ThemeData(brightness: Brightness.light).textTheme,
               ),
+              scaffoldBackgroundColor: const Color(0xFFF4F7F7),
+              appBarTheme: const AppBarTheme(centerTitle: false, elevation: 0),
+              cardTheme: CardThemeData(
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
+                ),
+              ),
+              inputDecorationTheme: InputDecorationTheme(
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide(
+                    color: Colors.teal.withValues(alpha: 0.18),
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: const BorderSide(width: 1.4),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 14,
+                ),
+              ),
+              floatingActionButtonTheme: const FloatingActionButtonThemeData(
+                elevation: 1,
+              ),
               useMaterial3: true,
             ),
             darkTheme: ThemeData(
@@ -52,6 +85,36 @@ class MyApp extends StatelessWidget {
               ),
               textTheme: GoogleFonts.poppinsTextTheme(
                 ThemeData(brightness: Brightness.dark).textTheme,
+              ),
+              appBarTheme: const AppBarTheme(centerTitle: false, elevation: 0),
+              cardTheme: CardThemeData(
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
+                ),
+              ),
+              inputDecorationTheme: InputDecorationTheme(
+                filled: true,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide(
+                    color: Colors.teal.withValues(alpha: 0.35),
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: const BorderSide(width: 1.4),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 14,
+                ),
+              ),
+              floatingActionButtonTheme: const FloatingActionButtonThemeData(
+                elevation: 1,
               ),
               useMaterial3: true,
             ),

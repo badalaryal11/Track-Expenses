@@ -20,7 +20,7 @@ class WeeklyBarChart extends StatelessWidget {
 
     List<BarChartGroupData> barGroups = [];
     final sortedKeys = dailySpending.keys.toList()..sort();
-    
+
     for (var day in sortedKeys) {
       final amount = dailySpending[day]!;
       barGroups.add(
@@ -32,21 +32,24 @@ class WeeklyBarChart extends StatelessWidget {
               color: Theme.of(context).colorScheme.primary,
               width: 14,
               borderRadius: BorderRadius.circular(4),
-            )
+            ),
           ],
         ),
       );
     }
 
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Weekly Spending Tracker',
-              style: Theme.of(context).textTheme.titleMedium,
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 24),
             SizedBox(
@@ -58,10 +61,21 @@ class WeeklyBarChart extends StatelessWidget {
                   barTouchData: BarTouchData(
                     touchTooltipData: BarTouchTooltipData(
                       getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                        final days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                        final days = [
+                          'Mon',
+                          'Tue',
+                          'Wed',
+                          'Thu',
+                          'Fri',
+                          'Sat',
+                          'Sun',
+                        ];
                         return BarTooltipItem(
                           '${days[group.x - 1]}\n${rod.toY.toStringAsFixed(2)}',
-                          const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         );
                       },
                     ),
@@ -72,7 +86,15 @@ class WeeklyBarChart extends StatelessWidget {
                       sideTitles: SideTitles(
                         showTitles: true,
                         getTitlesWidget: (double value, TitleMeta meta) {
-                          final days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                          final days = [
+                            'Mon',
+                            'Tue',
+                            'Wed',
+                            'Thu',
+                            'Fri',
+                            'Sat',
+                            'Sun',
+                          ];
                           int index = value.toInt() - 1;
                           if (index >= 0 && index < 7) {
                             return Padding(
@@ -89,7 +111,7 @@ class WeeklyBarChart extends StatelessWidget {
                       ),
                     ),
                     leftTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false), 
+                      sideTitles: SideTitles(showTitles: false),
                     ),
                     topTitles: const AxisTitles(
                       sideTitles: SideTitles(showTitles: false),
@@ -102,7 +124,9 @@ class WeeklyBarChart extends StatelessWidget {
                   gridData: FlGridData(
                     show: true,
                     getDrawingHorizontalLine: (value) => FlLine(
-                      color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.outlineVariant.withValues(alpha: 0.3),
                       strokeWidth: 1,
                       dashArray: [4, 4],
                     ),

@@ -20,7 +20,7 @@ class MonthlyBarChart extends StatelessWidget {
 
     List<BarChartGroupData> barGroups = [];
     final sortedKeys = dailySpending.keys.toList()..sort();
-    
+
     for (var day in sortedKeys) {
       final amount = dailySpending[day]!;
       barGroups.add(
@@ -32,21 +32,24 @@ class MonthlyBarChart extends StatelessWidget {
               color: Theme.of(context).colorScheme.primary,
               width: 6,
               borderRadius: BorderRadius.circular(2),
-            )
+            ),
           ],
         ),
       );
     }
 
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Daily Spending Tracker',
-              style: Theme.of(context).textTheme.titleMedium,
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 24),
             SizedBox(
@@ -60,7 +63,10 @@ class MonthlyBarChart extends StatelessWidget {
                       getTooltipItem: (group, groupIndex, rod, rodIndex) {
                         return BarTooltipItem(
                           'Day ${group.x}\n${rod.toY.toStringAsFixed(2)}',
-                          const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         );
                       },
                     ),
@@ -73,7 +79,9 @@ class MonthlyBarChart extends StatelessWidget {
                         getTitlesWidget: (double value, TitleMeta meta) {
                           int day = value.toInt();
                           // Only show select days so it doesn't overlap
-                          if (day == 1 || day % 5 == 0 || day == dailySpending.length) {
+                          if (day == 1 ||
+                              day % 5 == 0 ||
+                              day == dailySpending.length) {
                             return Padding(
                               padding: const EdgeInsets.only(top: 8.0),
                               child: Text(
@@ -88,7 +96,7 @@ class MonthlyBarChart extends StatelessWidget {
                       ),
                     ),
                     leftTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false), 
+                      sideTitles: SideTitles(showTitles: false),
                     ),
                     topTitles: const AxisTitles(
                       sideTitles: SideTitles(showTitles: false),
@@ -101,7 +109,9 @@ class MonthlyBarChart extends StatelessWidget {
                   gridData: FlGridData(
                     show: true,
                     getDrawingHorizontalLine: (value) => FlLine(
-                      color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.outlineVariant.withValues(alpha: 0.3),
                       strokeWidth: 1,
                       dashArray: [4, 4],
                     ),

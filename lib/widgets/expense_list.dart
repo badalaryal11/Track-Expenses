@@ -11,14 +11,20 @@ class ExpenseList extends StatelessWidget {
   final List<Expense>? customExpenses;
   final int? itemLimit;
 
-  const ExpenseList({super.key, this.physics, this.shrinkWrap = false, this.customExpenses, this.itemLimit});
+  const ExpenseList({
+    super.key,
+    this.physics,
+    this.shrinkWrap = false,
+    this.customExpenses,
+    this.itemLimit,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Consumer<ExpenseProvider>(
       builder: (context, provider, child) {
         final allExpenses = customExpenses ?? provider.expenses;
-        final expenses = itemLimit != null && allExpenses.length > itemLimit! 
+        final expenses = itemLimit != null && allExpenses.length > itemLimit!
             ? allExpenses.sublist(0, itemLimit)
             : allExpenses;
 
@@ -30,20 +36,24 @@ class ExpenseList extends StatelessWidget {
                 Icon(
                   Icons.receipt_long,
                   size: 80,
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.3),
                 ),
                 const SizedBox(height: 16),
                 Text(
                   'No expenses yet!',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Tap the + button to add your first expense',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
               ],
@@ -64,16 +74,20 @@ class ExpenseList extends StatelessWidget {
               background: Container(
                 alignment: Alignment.centerRight,
                 padding: const EdgeInsets.only(right: 24),
-                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
                 decoration: BoxDecoration(
                   color: Colors.red.shade400,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                child: const Icon(Icons.delete_forever, color: Colors.white, size: 28),
+                child: const Icon(
+                  Icons.delete_forever,
+                  color: Colors.white,
+                  size: 28,
+                ),
               ),
               onDismissed: (_) {
                 provider.deleteExpense(expense);
-                
+
                 ScaffoldMessenger.of(context).clearSnackBars();
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -81,7 +95,9 @@ class ExpenseList extends StatelessWidget {
                     duration: const Duration(seconds: 4),
                     behavior: SnackBarBehavior.floating,
                     margin: const EdgeInsets.all(12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                     action: SnackBarAction(
                       label: 'UNDO',
                       textColor: Theme.of(context).colorScheme.primary,
@@ -93,13 +109,17 @@ class ExpenseList extends StatelessWidget {
                 );
               },
               child: Card(
-                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                elevation: 2,
+                margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
                 child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 8,
+                  ),
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (_) => AddExpenseScreen(expenseToEdit: expense),
+                        builder: (_) =>
+                            AddExpenseScreen(expenseToEdit: expense),
                       ),
                     );
                   },
@@ -112,20 +132,30 @@ class ExpenseList extends StatelessWidget {
                   ),
                   title: Text(
                     expense.title,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('${expense.account} • ${DateFormat.yMMMd().format(expense.date)}'),
+                      Text(
+                        '${expense.account} • ${DateFormat.yMMMd().format(expense.date)}',
+                      ),
                       if (expense.notes != null && expense.notes!.isNotEmpty)
-                        Text(
-                          expense.notes!,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            fontStyle: FontStyle.italic,
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Text(
+                            expense.notes!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                  fontStyle: FontStyle.italic,
+                                ),
                           ),
                         ),
                     ],
@@ -133,7 +163,7 @@ class ExpenseList extends StatelessWidget {
                   trailing: Text(
                     '${expense.currency} ${expense.amount.toStringAsFixed(2)}',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w700,
                       color: Colors.red[700],
                     ),
                   ),
@@ -145,5 +175,4 @@ class ExpenseList extends StatelessWidget {
       },
     );
   }
-
 }

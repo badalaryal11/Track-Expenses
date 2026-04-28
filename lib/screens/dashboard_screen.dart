@@ -32,13 +32,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    _currentQuote = AppConstants.quotes[Random().nextInt(AppConstants.quotes.length)];
+    _currentQuote =
+        AppConstants.quotes[Random().nextInt(AppConstants.quotes.length)];
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final expenseProvider = Provider.of<ExpenseProvider>(context, listen: false);
+    final expenseProvider = Provider.of<ExpenseProvider>(
+      context,
+      listen: false,
+    );
     final currencies = expenseProvider.uniqueCurrencies;
 
     // Initialize selected currency from saved default on first build
@@ -57,18 +61,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final expenseProvider = Provider.of<ExpenseProvider>(context);
     final currencies = expenseProvider.uniqueCurrencies;
 
-    final String currency = _selectedCurrency ?? expenseProvider.defaultCurrency;
+    final String currency =
+        _selectedCurrency ?? expenseProvider.defaultCurrency;
 
     // Get stats based on selection
     double currentTotal = 0.0;
     if (_selectedView == 'Daily') {
-      currentTotal = expenseProvider.calculateDailyTotal(
-        currency: currency,
-      );
+      currentTotal = expenseProvider.calculateDailyTotal(currency: currency);
     } else if (_selectedView == 'Weekly') {
-      currentTotal = expenseProvider.calculateWeeklyTotal(
-        currency: currency,
-      );
+      currentTotal = expenseProvider.calculateWeeklyTotal(currency: currency);
     } else {
       currentTotal = expenseProvider.calculateMonthlyTotal(
         _selectedDate,
@@ -92,9 +93,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     Map<int, double> dailySpendingWeek = {};
     if (_selectedView == 'Weekly') {
-      dailySpendingWeek = expenseProvider.getDailyStats(
-        currency: currency,
-      );
+      dailySpendingWeek = expenseProvider.getDailyStats(currency: currency);
     }
 
     return Scaffold(
@@ -125,7 +124,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
-          final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+          final isLandscape =
+              MediaQuery.of(context).orientation == Orientation.landscape;
 
           if (isLandscape) {
             return Row(
@@ -138,10 +138,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       children: [
                         // View Selector
                         Padding(
-                          padding: const EdgeInsets.all(8.0),
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                           child: ViewSelector(
                             selectedView: _selectedView,
-                            onViewChanged: (view) => setState(() => _selectedView = view),
+                            onViewChanged: (view) =>
+                                setState(() => _selectedView = view),
                           ),
                         ),
 
@@ -149,14 +150,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         if (_selectedView == 'Monthly')
                           MonthSelector(
                             selectedDate: _selectedDate,
-                            onDateChanged: (date) => setState(() => _selectedDate = date),
+                            onDateChanged: (date) =>
+                                setState(() => _selectedDate = date),
                           ),
 
                         // Summary Card
                         SummaryCard(
                           currencies: currencies,
                           selectedCurrency: currency,
-                          onCurrencyChanged: (c) => setState(() => _selectedCurrency = c),
+                          onCurrencyChanged: (c) =>
+                              setState(() => _selectedCurrency = c),
                           selectedView: _selectedView,
                           currentTotal: currentTotal,
                           currentQuote: _currentQuote,
@@ -194,7 +197,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             TextButton(
                               onPressed: () {
                                 Navigator.of(context).push(
-                                  MaterialPageRoute(builder: (_) => const AllTransactionsScreen()),
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        const AllTransactionsScreen(),
+                                  ),
                                 );
                               },
                               child: const Text('View All'),
@@ -214,10 +220,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 children: [
                   // View Selector
                   Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                     child: ViewSelector(
                       selectedView: _selectedView,
-                      onViewChanged: (view) => setState(() => _selectedView = view),
+                      onViewChanged: (view) =>
+                          setState(() => _selectedView = view),
                     ),
                   ),
 
@@ -225,14 +232,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   if (_selectedView == 'Monthly')
                     MonthSelector(
                       selectedDate: _selectedDate,
-                      onDateChanged: (date) => setState(() => _selectedDate = date),
+                      onDateChanged: (date) =>
+                          setState(() => _selectedDate = date),
                     ),
 
                   // Summary Card
                   SummaryCard(
                     currencies: currencies,
                     selectedCurrency: currency,
-                    onCurrencyChanged: (c) => setState(() => _selectedCurrency = c),
+                    onCurrencyChanged: (c) =>
+                        setState(() => _selectedCurrency = c),
                     selectedView: _selectedView,
                     currentTotal: currentTotal,
                     currentQuote: _currentQuote,
@@ -243,14 +252,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   // Category Chart
                   CategoryChart(categoryTotals: categoryTotals),
                   if (_selectedView == 'Weekly') ...[
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 2),
                     WeeklyBarChart(dailySpending: dailySpendingWeek),
                   ],
                   if (_selectedView == 'Monthly') ...[
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 2),
                     MonthlyBarChart(dailySpending: dailySpendingMonth),
                   ],
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 4),
 
                   // Recent Transactions Header
                   Padding(
@@ -265,7 +274,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         TextButton(
                           onPressed: () {
                             Navigator.of(context).push(
-                              MaterialPageRoute(builder: (_) => const AllTransactionsScreen()),
+                              MaterialPageRoute(
+                                builder: (_) => const AllTransactionsScreen(),
+                              ),
                             );
                           },
                           child: const Text('View All'),
@@ -280,6 +291,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     shrinkWrap: true,
                     itemLimit: 5,
                   ),
+                  const SizedBox(height: 84),
                 ],
               ),
             );
@@ -300,10 +312,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void _showYearlyTotalDialog(BuildContext context, ExpenseProvider provider) {
     final year = DateTime.now().year;
     final cur = _selectedCurrency ?? provider.defaultCurrency;
-    final total = provider.calculateYearlyTotal(
-      year,
-      currency: cur,
-    );
+    final total = provider.calculateYearlyTotal(year, currency: cur);
 
     showDialog(
       context: context,
@@ -327,12 +336,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  void _showDefaultCurrencyDialog(BuildContext context, ExpenseProvider provider) {
+  void _showDefaultCurrencyDialog(
+    BuildContext context,
+    ExpenseProvider provider,
+  ) {
     final allCurrencies = AppConstants.currencies; // includes 'Other'
     final customController = TextEditingController();
-    
+
     // Determine initial state
-    final standardCurrencies = allCurrencies.where((c) => c != 'Other').toList();
+    final standardCurrencies = allCurrencies
+        .where((c) => c != 'Other')
+        .toList();
     String selected;
     if (standardCurrencies.contains(provider.defaultCurrency)) {
       selected = provider.defaultCurrency;
@@ -367,16 +381,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          ...allCurrencies.map((c) => RadioListTile<String>(
-                            title: Text(c),
-                            value: c,
-                          )),
+                          ...allCurrencies.map(
+                            (c) =>
+                                RadioListTile<String>(title: Text(c), value: c),
+                          ),
                         ],
                       ),
                     ),
                     if (selected == 'Other')
                       Padding(
-                        padding: const EdgeInsets.only(top: 8, left: 16, right: 16),
+                        padding: const EdgeInsets.only(
+                          top: 8,
+                          left: 16,
+                          right: 16,
+                        ),
                         child: TextField(
                           controller: customController,
                           textCapitalization: TextCapitalization.characters,
@@ -404,7 +422,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                     if (currency.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Please enter a currency code')),
+                        const SnackBar(
+                          content: Text('Please enter a currency code'),
+                        ),
                       );
                       return;
                     }
@@ -413,7 +433,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     setState(() => _selectedCurrency = currency);
                     Navigator.of(ctx).pop();
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Default currency set to $currency')),
+                      SnackBar(
+                        content: Text('Default currency set to $currency'),
+                      ),
                     );
                   },
                   child: const Text('Save'),
@@ -438,123 +460,145 @@ class _DashboardScreenState extends State<DashboardScreen> {
             padding: const EdgeInsets.symmetric(vertical: 16),
             child: SingleChildScrollView(
               child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(2),
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 40,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
-                ),
-                Text(
-                  'Settings',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
+                  Text(
+                    'Settings',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                ListTile(
-                  leading: Icon(
-                    provider.themeMode == ThemeMode.dark
-                        ? Icons.dark_mode
-                        : provider.themeMode == ThemeMode.light
-                            ? Icons.light_mode
-                            : Icons.brightness_auto,
+                  const SizedBox(height: 16),
+                  ListTile(
+                    leading: Icon(
+                      provider.themeMode == ThemeMode.dark
+                          ? Icons.dark_mode
+                          : provider.themeMode == ThemeMode.light
+                          ? Icons.light_mode
+                          : Icons.brightness_auto,
+                    ),
+                    title: const Text('Appearance'),
+                    subtitle: Text(
+                      provider.themeMode == ThemeMode.dark
+                          ? 'Dark Mode'
+                          : provider.themeMode == ThemeMode.light
+                          ? 'Light Mode'
+                          : 'System Default',
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      Navigator.of(ctx).pop();
+                      _showThemeModeDialog(context, provider);
+                    },
                   ),
-                  title: const Text('Appearance'),
-                  subtitle: Text(
-                    provider.themeMode == ThemeMode.dark
-                        ? 'Dark Mode'
-                        : provider.themeMode == ThemeMode.light
-                            ? 'Light Mode'
-                            : 'System Default',
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: const Icon(Icons.currency_exchange),
+                    title: const Text('Default Currency'),
+                    subtitle: Text('Currently: ${provider.defaultCurrency}'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      Navigator.of(ctx).pop();
+                      _showDefaultCurrencyDialog(context, provider);
+                    },
                   ),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
-                    Navigator.of(ctx).pop();
-                    _showThemeModeDialog(context, provider);
-                  },
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.currency_exchange),
-                  title: const Text('Default Currency'),
-                  subtitle: Text('Currently: ${provider.defaultCurrency}'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
-                    Navigator.of(ctx).pop();
-                    _showDefaultCurrencyDialog(context, provider);
-                  },
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.track_changes),
-                  title: const Text('Monthly Budget'),
-                  subtitle: Text(provider.monthlyBudget > 0 ? 'Set to ${provider.defaultCurrency} ${provider.monthlyBudget.toStringAsFixed(0)}' : 'Not set'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
-                    Navigator.of(ctx).pop();
-                    _showSetBudgetDialog(context, provider);
-                  },
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.category),
-                  title: const Text('Manage Categories'),
-                  subtitle: const Text('Add or remove custom categories'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
-                    Navigator.of(ctx).pop();
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const ManageCategoriesScreen()),
-                    );
-                  },
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.pin),
-                  title: Text(provider.hasPinSetup ? 'Remove App PIN' : 'Set App PIN'),
-                  subtitle: Text(provider.hasPinSetup ? 'Disable PIN lock' : 'Protect app with a 4-digit PIN'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
-                    Navigator.of(ctx).pop();
-                    if (provider.hasPinSetup) {
-                      provider.removeAppPin();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('App PIN removed')),
-                      );
-                    } else {
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: const Icon(Icons.track_changes),
+                    title: const Text('Monthly Budget'),
+                    subtitle: Text(
+                      provider.monthlyBudget > 0
+                          ? 'Set to ${provider.defaultCurrency} ${provider.monthlyBudget.toStringAsFixed(0)}'
+                          : 'Not set',
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      Navigator.of(ctx).pop();
+                      _showSetBudgetDialog(context, provider);
+                    },
+                  ),
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: const Icon(Icons.category),
+                    title: const Text('Manage Categories'),
+                    subtitle: const Text('Add or remove custom categories'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      Navigator.of(ctx).pop();
                       Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const PinSetupScreen()),
+                        MaterialPageRoute(
+                          builder: (_) => const ManageCategoriesScreen(),
+                        ),
                       );
-                    }
-                  },
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: Icon(Icons.delete_forever, color: Colors.red.shade400),
-                  title: Text(
-                    'Clear All Data',
-                    style: TextStyle(color: Colors.red.shade400),
+                    },
                   ),
-                  subtitle: const Text('Delete all expenses and reset settings'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
-                    Navigator.of(ctx).pop();
-                    _showClearDataDialog(context, provider);
-                  },
-                ),
-              ],
-            ),
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: const Icon(Icons.pin),
+                    title: Text(
+                      provider.hasPinSetup ? 'Remove App PIN' : 'Set App PIN',
+                    ),
+                    subtitle: Text(
+                      provider.hasPinSetup
+                          ? 'Disable PIN lock'
+                          : 'Protect app with a 4-digit PIN',
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      Navigator.of(ctx).pop();
+                      if (provider.hasPinSetup) {
+                        provider.removeAppPin();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('App PIN removed')),
+                        );
+                      } else {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const PinSetupScreen(),
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: Icon(
+                      Icons.delete_forever,
+                      color: Colors.red.shade400,
+                    ),
+                    title: Text(
+                      'Clear All Data',
+                      style: TextStyle(color: Colors.red.shade400),
+                    ),
+                    subtitle: const Text(
+                      'Delete all expenses and reset settings',
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      Navigator.of(ctx).pop();
+                      _showClearDataDialog(context, provider);
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
         );
       },
     );
   }
+
   void _showThemeModeDialog(BuildContext context, ExpenseProvider provider) {
     showDialog(
       context: context,
@@ -570,7 +614,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     title: const Text('System Default'),
                     subtitle: const Text('Follow device setting'),
                     leading: const Icon(Icons.brightness_auto),
-                    trailing: provider.themeMode == ThemeMode.system ? const Icon(Icons.check, color: Colors.teal) : null,
+                    trailing: provider.themeMode == ThemeMode.system
+                        ? const Icon(Icons.check, color: Colors.teal)
+                        : null,
                     onTap: () {
                       provider.setThemeMode(ThemeMode.system);
                       setDialogState(() {});
@@ -579,7 +625,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ListTile(
                     title: const Text('Light Mode'),
                     leading: const Icon(Icons.light_mode),
-                    trailing: provider.themeMode == ThemeMode.light ? const Icon(Icons.check, color: Colors.teal) : null,
+                    trailing: provider.themeMode == ThemeMode.light
+                        ? const Icon(Icons.check, color: Colors.teal)
+                        : null,
                     onTap: () {
                       provider.setThemeMode(ThemeMode.light);
                       setDialogState(() {});
@@ -588,7 +636,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ListTile(
                     title: const Text('Dark Mode'),
                     leading: const Icon(Icons.dark_mode),
-                    trailing: provider.themeMode == ThemeMode.dark ? const Icon(Icons.check, color: Colors.teal) : null,
+                    trailing: provider.themeMode == ThemeMode.dark
+                        ? const Icon(Icons.check, color: Colors.teal)
+                        : null,
                     onTap: () {
                       provider.setThemeMode(ThemeMode.dark);
                       setDialogState(() {});
@@ -611,9 +661,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   void _showSetBudgetDialog(BuildContext context, ExpenseProvider provider) {
     final controller = TextEditingController(
-      text: provider.monthlyBudget > 0 ? provider.monthlyBudget.toStringAsFixed(0) : '',
+      text: provider.monthlyBudget > 0
+          ? provider.monthlyBudget.toStringAsFixed(0)
+          : '',
     );
-    
+
     showDialog(
       context: context,
       builder: (ctx) {
@@ -649,7 +701,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 provider.setMonthlyBudget(val);
                 Navigator.of(ctx).pop();
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(val > 0 ? 'Monthly budget set to ${provider.defaultCurrency} ${val.toStringAsFixed(0)}' : 'Monthly budget disabled')),
+                  SnackBar(
+                    content: Text(
+                      val > 0
+                          ? 'Monthly budget set to ${provider.defaultCurrency} ${val.toStringAsFixed(0)}'
+                          : 'Monthly budget disabled',
+                    ),
+                  ),
                 );
               },
               child: const Text('Save'),
@@ -665,7 +723,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
       context: context,
       builder: (ctx) {
         return AlertDialog(
-          icon: Icon(Icons.warning_amber_rounded, color: Colors.red.shade400, size: 48),
+          icon: Icon(
+            Icons.warning_amber_rounded,
+            color: Colors.red.shade400,
+            size: 48,
+          ),
           title: const Text('Clear All Data?'),
           content: const Text(
             'This will permanently delete all your expenses and reset your settings. This action cannot be undone.',

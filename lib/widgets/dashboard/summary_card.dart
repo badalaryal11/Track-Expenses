@@ -24,11 +24,12 @@ class SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Card(
-      margin: const EdgeInsets.all(16),
-      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+      color: theme.colorScheme.surfaceContainerHigh,
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(18),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -42,28 +43,37 @@ class SummaryCard extends StatelessWidget {
                   child: Image.asset('assets/icon/app_icon.png'),
                 ),
                 if (currencies.isNotEmpty)
-                  DropdownButton<String>(
-                    value: selectedCurrency,
-                    underline: Container(),
-                    icon: const Icon(Icons.arrow_drop_down),
-                    items: currencies.map((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                    onChanged: (newValue) {
-                      if (newValue != null) {
-                        onCurrencyChanged(newValue);
-                      }
-                    },
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      color: theme.colorScheme.surface,
+                    ),
+                    child: DropdownButton<String>(
+                      value: selectedCurrency,
+                      underline: Container(),
+                      icon: const Icon(Icons.arrow_drop_down),
+                      items: currencies.map((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                      onChanged: (newValue) {
+                        if (newValue != null) {
+                          onCurrencyChanged(newValue);
+                        }
+                      },
+                    ),
                   ),
               ],
             ),
             const SizedBox(height: 12),
             Text(
               '$selectedView Spending',
-              style: Theme.of(context).textTheme.titleMedium,
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 4),
             AnimatedSwitcher(
@@ -71,19 +81,18 @@ class SummaryCard extends StatelessWidget {
               transitionBuilder: (child, animation) {
                 return FadeTransition(
                   opacity: animation,
-                  child: ScaleTransition(
-                    scale: animation,
-                    child: child,
-                  ),
+                  child: ScaleTransition(scale: animation, child: child),
                 );
               },
               child: Text(
                 '$selectedCurrency ${currentTotal.toStringAsFixed(2)}',
-                key: ValueKey('${isPortrait ? "portrait_" : ""}$selectedView$selectedCurrency$currentTotal'),
-                style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
+                key: ValueKey(
+                  '${isPortrait ? "portrait_" : ""}$selectedView$selectedCurrency$currentTotal',
+                ),
+                style: theme.textTheme.displaySmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.primary,
+                ),
               ),
             ),
             if (selectedView == 'Monthly' && monthlyBudget > 0) ...[
@@ -100,9 +109,11 @@ class SummaryCard extends StatelessWidget {
                       ),
                       Text(
                         '${(currentTotal / monthlyBudget * 100).clamp(0, 100).toStringAsFixed(1)}%',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        style: theme.textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: currentTotal > monthlyBudget ? Colors.red : null,
+                          color: currentTotal > monthlyBudget
+                              ? Colors.red
+                              : null,
                         ),
                       ),
                     ],
@@ -113,9 +124,12 @@ class SummaryCard extends StatelessWidget {
                     child: LinearProgressIndicator(
                       value: (currentTotal / monthlyBudget).clamp(0.0, 1.0),
                       minHeight: 8,
-                      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      backgroundColor:
+                          theme.colorScheme.surfaceContainerHighest,
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        currentTotal > monthlyBudget ? Colors.red : Theme.of(context).colorScheme.primary,
+                        currentTotal > monthlyBudget
+                            ? Colors.red
+                            : theme.colorScheme.primary,
                       ),
                     ),
                   ),
@@ -135,17 +149,17 @@ class SummaryCard extends StatelessWidget {
             ],
             const SizedBox(height: 12),
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(8),
+                color: theme.colorScheme.surface.withValues(alpha: 0.65),
+                borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
                 currentQuote,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontStyle: FontStyle.italic,
-                      color: Theme.of(context).colorScheme.secondary,
-                    ),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontStyle: FontStyle.italic,
+                  color: theme.colorScheme.secondary,
+                ),
                 textAlign: TextAlign.center,
               ),
             ),

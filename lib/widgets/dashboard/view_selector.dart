@@ -13,34 +13,38 @@ class ViewSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(14),
+        color: theme.colorScheme.surfaceContainerHighest,
       ),
       child: Row(
         children: AppConstants.dashboardViews.map((view) {
           final isSelected = selectedView == view;
           return Expanded(
-            child: GestureDetector(
+            child: InkWell(
+              borderRadius: BorderRadius.circular(14),
               onTap: () => onViewChanged(view),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(vertical: 10),
+                padding: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(14),
                   color: isSelected
-                      ? Theme.of(context).colorScheme.primary
+                      ? theme.colorScheme.primary
                       : Colors.transparent,
                 ),
                 alignment: Alignment.center,
                 child: Text(
                   view,
                   style: TextStyle(
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    fontWeight: isSelected
+                        ? FontWeight.bold
+                        : FontWeight.normal,
                     color: isSelected
-                        ? Theme.of(context).colorScheme.onPrimary
-                        : Theme.of(context).colorScheme.onSurfaceVariant,
+                        ? theme.colorScheme.onPrimary
+                        : theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
               ),

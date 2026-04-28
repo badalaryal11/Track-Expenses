@@ -21,14 +21,17 @@ class CategoryChart extends StatelessWidget {
       ..sort((a, b) => b.value.compareTo(a.value));
 
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Spending by Category',
-              style: Theme.of(context).textTheme.titleMedium,
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 16),
             SizedBox(
@@ -43,8 +46,10 @@ class CategoryChart extends StatelessWidget {
                         centerSpaceRadius: 36,
                         sections: entries.map((entry) {
                           final percentage = (entry.value / total * 100);
-                          final color =
-                              Provider.of<ExpenseProvider>(context, listen: false).getCategoryColor(entry.key);
+                          final color = Provider.of<ExpenseProvider>(
+                            context,
+                            listen: false,
+                          ).getCategoryColor(entry.key);
                           return PieChartSectionData(
                             value: entry.value,
                             color: color,
@@ -67,8 +72,10 @@ class CategoryChart extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: entries.map((entry) {
-                        final color =
-                            Provider.of<ExpenseProvider>(context, listen: false).getCategoryColor(entry.key);
+                        final color = Provider.of<ExpenseProvider>(
+                          context,
+                          listen: false,
+                        ).getCategoryColor(entry.key);
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 3),
                           child: Row(
