@@ -18,7 +18,9 @@ void main() async {
     DeviceOrientation.landscapeRight,
   ]);
   await Hive.initFlutter();
-  Hive.registerAdapter(ExpenseAdapter());
+  if (!Hive.isAdapterRegistered(0)) {
+    Hive.registerAdapter(ExpenseAdapter());
+  }
 
   runApp(const MyApp());
 }

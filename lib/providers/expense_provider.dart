@@ -109,16 +109,19 @@ class ExpenseProvider with ChangeNotifier {
     _expenses = _repository.getAllExpenses();
 
     // Load saved settings
-    final settingsBox = await Hive.openBox(_settingsBoxName);
-    _defaultCurrency = settingsBox.get(
-      _defaultCurrencyKey,
-      defaultValue: _fallbackCurrency,
+    final settingsBox = await _openSettingsBoxSafely();
+    _defaultCurrency = _readString(
+      settingsBox.get(_defaultCurrencyKey),
+      fallback: _fallbackCurrency,
     );
-    _appPin = settingsBox.get(_appPinKey);
-    _monthlyBudget = settingsBox.get(_monthlyBudgetKey, defaultValue: 0.0);
-    final savedThemeMode = settingsBox.get(
-      _themeModeKey,
-      defaultValue: 'system',
+    _appPin = _readNullableString(settingsBox.get(_appPinKey));
+    _monthlyBudget = _readDouble(
+      settingsBox.get(_monthlyBudgetKey),
+      fallback: 0.0,
+    );
+    final savedThemeMode = _readString(
+      settingsBox.get(_themeModeKey),
+      fallback: 'system',
     );
     _themeMode = _themeModeFromString(savedThemeMode);
 
@@ -137,6 +140,40 @@ class ExpenseProvider with ChangeNotifier {
       _sortExpenses();
     }
     notifyListeners();
+  }
+
+  Future<Box> _openSettingsBoxSafely() async {
+    try {
+      return await Hive.openBox(_settingsBoxName);
+    } on HiveError {
+      // Recover from corrupted/incompatible settings payloads.
+      await Hive.deleteBoxFromDisk(_settingsBoxName);
+      return Hive.openBox(_settingsBoxName);
+    }
+  }
+
+  String _readString(dynamic raw, {required String fallback}) {
+    if (raw is String && raw.trim().isNotEmpty) {
+      return raw;
+    }
+    return fallback;
+  }
+
+  String? _readNullableString(dynamic raw) {
+    if (raw is String && raw.isNotEmpty) {
+      return raw;
+    }
+    return null;
+  }
+
+  double _readDouble(dynamic raw, {required double fallback}) {
+    if (raw is num) {
+      return raw.toDouble();
+    }
+    if (raw is String) {
+      return double.tryParse(raw) ?? fallback;
+    }
+    return fallback;
   }
 
   List<AppCategory> _decodeCustomCategories(dynamic customCatsJson) {

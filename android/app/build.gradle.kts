@@ -47,8 +47,11 @@ android {
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("release")
-            isMinifyEnabled = true
-            isShrinkResources = true
+            // Prioritize startup stability for production builds.
+            // App shrinking/obfuscation can strip classes used by plugins and
+            // cause startup crashes on some devices.
+            isMinifyEnabled = false
+            isShrinkResources = false
         }
     }
 }
