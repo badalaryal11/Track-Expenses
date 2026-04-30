@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "690869062322",
+    "project_id": "my-expense-d7270",
+    "storage_bucket": "my-expense-d7270.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:690869062322:android:0a2849ef92ebc2537857ab",
+        "android_client_info": {
+          "package_name": "com.badalaryal.myexpense"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "690869062322-fbln9j3u3rfii2v25nq22s89cokhdckb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.badalaryal.myexpense",
+            "certificate_hash": "ce4b0e02e9fa58c7f35eb225fb5771efaf52c213"
+          }
+        },
+        {
+          "client_id": "690869062322-bfiudn6r5nq5bd3j64uah7sieqhbh6fi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCHr3lF_GYjKn6gGyHNgxttjPvmMjTjIPk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "690869062322-bfiudn6r5nq5bd3j64uah7sieqhbh6fi.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
