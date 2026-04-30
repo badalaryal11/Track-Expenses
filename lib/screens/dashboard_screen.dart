@@ -16,6 +16,7 @@ import 'package:track_expenses/widgets/dashboard/monthly_bar_chart.dart';
 import 'package:track_expenses/widgets/dashboard/weekly_bar_chart.dart';
 import 'package:track_expenses/widgets/expense_list.dart';
 import 'package:track_expenses/screens/settings_screen.dart' as track_settings;
+import 'package:track_expenses/screens/about_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -593,6 +594,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (_) => const track_settings.SettingsScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: const Icon(Icons.info),
+                    title: const Text('About App'),
+                    subtitle: const Text('Features, versions, and more'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      Navigator.of(ctx).pop();
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const AboutScreen(),
                         ),
                       );
                     },
