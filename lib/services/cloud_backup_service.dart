@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
@@ -22,7 +23,7 @@ class GoogleDriveBackupService {
     try {
       return await _googleSignIn.signIn();
     } catch (error) {
-      print("Google Sign In Error: $error");
+      debugPrint("Google Sign In Error: $error");
       return null;
     }
   }
@@ -78,7 +79,7 @@ class GoogleDriveBackupService {
 
       return true;
     } catch (e) {
-      print("Backup failed: $e");
+      debugPrint("Backup failed: $e");
       return false;
     }
   }
@@ -99,7 +100,7 @@ class GoogleDriveBackupService {
       );
 
       if (fileList.files == null || fileList.files!.isEmpty) {
-        print("No backup found.");
+        debugPrint("No backup found.");
         return false;
       }
 
@@ -120,7 +121,7 @@ class GoogleDriveBackupService {
 
       return true;
     } catch (e) {
-      print("Restore failed: $e");
+      debugPrint("Restore failed: $e");
       return false;
     }
   }
@@ -154,7 +155,7 @@ class GoogleDriveBackupService {
       final file = File('${directory.path}/expenses_backup.json');
       return await file.writeAsString(jsonString);
     } catch (e) {
-      print("Error creating local backup file: $e");
+      debugPrint("Error creating local backup file: $e");
       return null;
     }
   }
@@ -183,7 +184,7 @@ class GoogleDriveBackupService {
         await box.add(expense);
       }
     } catch (e) {
-      print("Error restoring from JSON: $e");
+      debugPrint("Error restoring from JSON: $e");
     }
   }
 }

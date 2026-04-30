@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -55,7 +56,7 @@ class ExchangeRateService {
         await prefs.setString(_lastUpdateKey, DateTime.now().toIso8601String());
       }
     } catch (e) {
-      print('Failed to fetch exchange rates: $e');
+      debugPrint('Failed to fetch exchange rates: $e');
     }
   }
 

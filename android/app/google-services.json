@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "690869062322-e6ld6jiah70b4gf6lopf2bmdldagok3u.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.badalaryal.myexpense",
+            "certificate_hash": "8f73fd52f50f000ce117dc2feffde679e49ecea5"
+          }
+        },
+        {
           "client_id": "690869062322-fbln9j3u3rfii2v25nq22s89cokhdckb.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

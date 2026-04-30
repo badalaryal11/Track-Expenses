@@ -130,7 +130,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     Navigator.of(ctx).pop();
                                     await provider.setDefaultCurrency(newCurrency);
                                     await ExchangeRateService.instance.initialize(newCurrency);
-                                    if (mounted) {
+                                    if (context.mounted) {
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(content: Text('Base currency set to $newCurrency and rates fetched!')),
                                       );
@@ -145,7 +145,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       } else if (value != null) {
                         await provider.setDefaultCurrency(value);
                         await ExchangeRateService.instance.initialize(value);
-                        if (mounted) {
+                        if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('Base currency updated and rates fetched!')),
                           );
@@ -157,7 +157,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ElevatedButton.icon(
                     onPressed: () async {
                       await ExchangeRateService.instance.fetchLatestRates(forceRefresh: true);
-                      if (mounted) {
+                      if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('Exchange rates refreshed successfully!')),
                         );
