@@ -6,6 +6,7 @@ import 'package:track_expenses/models/expense.dart';
 import 'package:track_expenses/providers/expense_provider.dart';
 import 'package:track_expenses/screens/auth_wrapper.dart';
 import 'package:track_expenses/screens/dashboard_screen.dart';
+import 'package:track_expenses/services/exchange_rate_service.dart';
 
 import 'package:flutter/services.dart';
 
@@ -152,7 +153,10 @@ class _InitWrapperState extends State<InitWrapper> {
 
   Future<void> _initialize() async {
     try {
-      await Provider.of<ExpenseProvider>(context, listen: false).init();
+      final provider = Provider.of<ExpenseProvider>(context, listen: false);
+      await provider.init();
+      await ExchangeRateService.instance.initialize(provider.defaultCurrency);
+      
       if (!mounted) return;
       setState(() {
         _isInitialized = true;

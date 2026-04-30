@@ -15,6 +15,7 @@ import 'package:track_expenses/screens/all_transactions_screen.dart';
 import 'package:track_expenses/widgets/dashboard/monthly_bar_chart.dart';
 import 'package:track_expenses/widgets/dashboard/weekly_bar_chart.dart';
 import 'package:track_expenses/widgets/expense_list.dart';
+import 'package:track_expenses/screens/settings_screen.dart' as track_settings;
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -217,7 +218,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           ],
                         ),
                       ),
-                      const Expanded(child: ExpenseList(itemLimit: 5)),
+                      Expanded(child: ExpenseList(itemLimit: 5, displayCurrency: currency)),
                     ],
                   ),
                 ),
@@ -295,10 +296,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
 
                   // Expense List
-                  const ExpenseList(
-                    physics: NeverScrollableScrollPhysics(),
+                  ExpenseList(
+                    physics: const NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
                     itemLimit: 5,
+                    displayCurrency: currency,
                   ),
                   const SizedBox(height: 84),
                 ],
@@ -582,21 +584,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                   const Divider(height: 1),
                   ListTile(
-                    leading: Icon(
-                      Icons.delete_forever,
-                      color: Colors.red.shade400,
-                    ),
-                    title: Text(
-                      'Clear All Data',
-                      style: TextStyle(color: Colors.red.shade400),
-                    ),
-                    subtitle: const Text(
-                      'Delete all expenses and reset settings',
-                    ),
+                    leading: const Icon(Icons.settings_applications),
+                    title: const Text('Advanced Settings'),
+                    subtitle: const Text('Cloud backup, exchange rates'),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () {
                       Navigator.of(ctx).pop();
-                      _showClearDataDialog(context, provider);
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const track_settings.SettingsScreen(),
+                        ),
+                      );
                     },
                   ),
                 ],
@@ -727,44 +725,4 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  void _showClearDataDialog(BuildContext context, ExpenseProvider provider) {
-    showDialog(
-      context: context,
-      builder: (ctx) {
-        return AlertDialog(
-          icon: Icon(
-            Icons.warning_amber_rounded,
-            color: Colors.red.shade400,
-            size: 48,
-          ),
-          title: const Text('Clear All Data?'),
-          content: const Text(
-            'This will permanently delete all your expenses and reset your settings. This action cannot be undone.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: Colors.red.shade400,
-              ),
-              onPressed: () async {
-                await provider.clearAllData();
-                setState(() => _selectedCurrency = null);
-                if (ctx.mounted) Navigator.of(ctx).pop();
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('All data has been cleared')),
-                  );
-                }
-              },
-              child: const Text('Delete Everything'),
-            ),
-          ],
-        );
-      },
-    );
-  }
 }

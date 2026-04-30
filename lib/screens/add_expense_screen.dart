@@ -324,7 +324,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       controller: _titleController,
       decoration: const InputDecoration(
         labelText: 'Title',
-        border: OutlineInputBorder(),
         prefixIcon: Icon(Icons.title),
       ),
     );
@@ -332,12 +331,11 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     final amountRow = Row(
       children: [
         Expanded(
-          flex: 2,
+          flex: 3,
           child: TextField(
             controller: _amountController,
             decoration: const InputDecoration(
               labelText: 'Amount',
-              border: OutlineInputBorder(),
               prefixIcon: Icon(Icons.attach_money),
             ),
             keyboardType: TextInputType.number,
@@ -345,7 +343,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
         ),
         const SizedBox(width: 16),
         Expanded(
-          flex: 1,
+          flex: 2,
           child: CustomDropdownField(
             label: 'Currency',
             value: _selectedCurrency,
@@ -382,7 +380,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               decoration: const InputDecoration(
                 labelText: 'Enter Currency Code',
                 hintText: 'e.g. AUD, JPY, INR',
-                border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.currency_exchange),
               ),
               textCapitalization: TextCapitalization.characters,
@@ -395,7 +392,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       child: InputDecorator(
         decoration: const InputDecoration(
           labelText: 'Date',
-          border: OutlineInputBorder(),
           prefixIcon: Icon(Icons.calendar_today),
         ),
         child: Text(
@@ -459,7 +455,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               controller: _customCategoryController,
               decoration: const InputDecoration(
                 labelText: 'Specify Category',
-                border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.edit),
               ),
             ),
@@ -484,7 +479,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       decoration: const InputDecoration(
         labelText: 'Notes (optional)',
         hintText: 'e.g. dinner with friends, annual renewal...',
-        border: OutlineInputBorder(),
         prefixIcon: Icon(Icons.notes),
       ),
       maxLines: 2,

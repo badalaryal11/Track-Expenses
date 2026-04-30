@@ -58,7 +58,7 @@ class AppConstants {
 
   static const currencies = [
     'NPR',
-    'RS',
+    'INR',
     'USD',
     'EUR',
     'GBP',

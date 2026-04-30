@@ -5,6 +5,7 @@ import 'package:track_expenses/models/expense.dart';
 import 'package:track_expenses/repositories/expense_repository.dart';
 import 'package:track_expenses/services/export_service.dart';
 import 'package:track_expenses/services/recurring_expense_service.dart';
+import 'package:track_expenses/services/exchange_rate_service.dart';
 import 'dart:convert';
 
 class ExpenseProvider with ChangeNotifier {
@@ -372,6 +373,11 @@ class ExpenseProvider with ChangeNotifier {
     return _expenses.fold(0.0, (sum, item) => sum + item.amount);
   }
 
+  double _getConvertedAmount(Expense e, String? targetCurrency) {
+    if (targetCurrency == null) return e.amount;
+    return ExchangeRateService.instance.convert(e.amount, e.currency, targetCurrency);
+  }
+
   // --- Aggregation Logic ---
 
   // Daily Stats: Last 7 days (or current week).
@@ -386,12 +392,10 @@ class ExpenseProvider with ChangeNotifier {
     if (_expenses.isEmpty) return stats;
 
     for (var expense in _expenses) {
-      if (currency != null && expense.currency != currency) continue;
-
       if (_isSameDayOrAfter(expense.date, startOfWeek) &&
           _isSameDayOrBefore(expense.date, endOfWeek)) {
         stats[expense.date.weekday] =
-            (stats[expense.date.weekday] ?? 0) + expense.amount;
+            (stats[expense.date.weekday] ?? 0) + _getConvertedAmount(expense, currency);
       }
     }
     return stats;
@@ -461,16 +465,11 @@ class ExpenseProvider with ChangeNotifier {
     final now = DateTime.now();
     return _expenses
         .where((e) {
-          final isSameDate =
-              e.date.year == now.year &&
-              e.date.month == now.month &&
-              e.date.day == now.day;
-          if (currency != null) {
-            return isSameDate && e.currency == currency;
-          }
-          return isSameDate;
+          return e.date.year == now.year &&
+                 e.date.month == now.month &&
+                 e.date.day == now.day;
         })
-        .fold(0.0, (sum, item) => sum + item.amount);
+        .fold(0.0, (sum, item) => sum + _getConvertedAmount(item, currency));
   }
 
   double calculateWeeklyTotal({String? currency}) {
@@ -496,43 +495,27 @@ class ExpenseProvider with ChangeNotifier {
 
     return _expenses
         .where((e) {
-          final isWithinWeek =
-              e.date.isAfter(start.subtract(const Duration(seconds: 1))) &&
-              e.date.isBefore(end.add(const Duration(seconds: 1)));
-
-          if (currency != null) {
-            return isWithinWeek && e.currency == currency;
-          }
-          return isWithinWeek;
+          return e.date.isAfter(start.subtract(const Duration(seconds: 1))) &&
+                 e.date.isBefore(end.add(const Duration(seconds: 1)));
         })
-        .fold(0.0, (sum, item) => sum + item.amount);
+        .fold(0.0, (sum, item) => sum + _getConvertedAmount(item, currency));
   }
 
   double calculateMonthlyTotal(DateTime targetDate, {String? currency}) {
     return _expenses
         .where((e) {
-          final isSameMonth =
-              e.date.year == targetDate.year &&
-              e.date.month == targetDate.month;
-
-          if (currency != null) {
-            return isSameMonth && e.currency == currency;
-          }
-          return isSameMonth;
+          return e.date.year == targetDate.year &&
+                 e.date.month == targetDate.month;
         })
-        .fold(0.0, (sum, item) => sum + item.amount);
+        .fold(0.0, (sum, item) => sum + _getConvertedAmount(item, currency));
   }
 
   double calculateYearlyTotal(int targetYear, {String? currency}) {
     return _expenses
         .where((e) {
-          final isSameYear = e.date.year == targetYear;
-          if (currency != null) {
-            return isSameYear && e.currency == currency;
-          }
-          return isSameYear;
+          return e.date.year == targetYear;
         })
-        .fold(0.0, (sum, item) => sum + item.amount);
+        .fold(0.0, (sum, item) => sum + _getConvertedAmount(item, currency));
   }
 
   /// Returns spending totals grouped by category for the given view/currency.
@@ -545,9 +528,6 @@ class ExpenseProvider with ChangeNotifier {
     final Map<String, double> totals = {};
 
     for (var expense in _expenses) {
-      // Filter by currency
-      if (currency != null && expense.currency != currency) continue;
-
       bool include = false;
       if (view == 'Daily') {
         include =
@@ -582,7 +562,7 @@ class ExpenseProvider with ChangeNotifier {
 
       if (include) {
         totals[expense.category] =
-            (totals[expense.category] ?? 0) + expense.amount;
+            (totals[expense.category] ?? 0) + _getConvertedAmount(expense, currency);
       }
     }
 
@@ -607,10 +587,8 @@ class ExpenseProvider with ChangeNotifier {
     for (var expense in _expenses) {
       if (expense.date.year == monthDate.year &&
           expense.date.month == monthDate.month) {
-        if (currency == null || expense.currency == currency) {
-          int day = expense.date.day;
-          spendingByDay[day] = (spendingByDay[day] ?? 0) + expense.amount;
-        }
+        int day = expense.date.day;
+        spendingByDay[day] = (spendingByDay[day] ?? 0) + _getConvertedAmount(expense, currency);
       }
     }
     return spendingByDay;

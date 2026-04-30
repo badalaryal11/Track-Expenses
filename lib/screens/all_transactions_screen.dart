@@ -300,7 +300,10 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
             );
           }
 
-          return ExpenseList(customExpenses: filteredExpenses);
+          return ExpenseList(
+            customExpenses: filteredExpenses,
+            displayCurrency: provider.defaultCurrency,
+          );
         },
       ),
     );

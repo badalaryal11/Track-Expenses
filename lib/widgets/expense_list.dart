@@ -4,12 +4,14 @@ import 'package:provider/provider.dart';
 import 'package:track_expenses/providers/expense_provider.dart';
 import 'package:track_expenses/screens/add_expense_screen.dart';
 import 'package:track_expenses/models/expense.dart';
+import 'package:track_expenses/services/exchange_rate_service.dart';
 
 class ExpenseList extends StatelessWidget {
   final ScrollPhysics? physics;
   final bool shrinkWrap;
   final List<Expense>? customExpenses;
   final int? itemLimit;
+  final String? displayCurrency;
 
   const ExpenseList({
     super.key,
@@ -17,6 +19,7 @@ class ExpenseList extends StatelessWidget {
     this.shrinkWrap = false,
     this.customExpenses,
     this.itemLimit,
+    this.displayCurrency,
   });
 
   @override
@@ -68,6 +71,19 @@ class ExpenseList extends StatelessWidget {
           itemBuilder: (context, index) {
             final expense = expenses[index];
             final categoryColor = provider.getCategoryColor(expense.category);
+
+            double displayAmount = expense.amount;
+            String displayCurr = expense.currency;
+            
+            if (displayCurrency != null && displayCurrency != expense.currency) {
+              displayAmount = ExchangeRateService.instance.convert(
+                expense.amount, 
+                expense.currency, 
+                displayCurrency!
+              );
+              displayCurr = displayCurrency!;
+            }
+
             return Dismissible(
               key: ValueKey(expense.id),
               direction: DismissDirection.endToStart,
@@ -160,12 +176,26 @@ class ExpenseList extends StatelessWidget {
                         ),
                     ],
                   ),
-                  trailing: Text(
-                    '${expense.currency} ${expense.amount.toStringAsFixed(2)}',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: Colors.red[700],
-                    ),
+                  trailing: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        '$displayCurr ${displayAmount.toStringAsFixed(2)}',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: Colors.red[700],
+                        ),
+                      ),
+                      if (displayCurrency != null && displayCurrency != expense.currency)
+                        Text(
+                          '(${expense.currency} ${expense.amount.toStringAsFixed(0)})',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            fontSize: 10,
+                          ),
+                        ),
+                    ],
                   ),
                 ),
               ),
