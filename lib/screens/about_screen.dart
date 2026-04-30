@@ -6,9 +6,7 @@ class AboutScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('About My Expense'),
-      ),
+      appBar: AppBar(title: const Text('About My Expense')),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
@@ -17,7 +15,9 @@ class AboutScreen extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                color: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -31,9 +31,9 @@ class AboutScreen extends StatelessWidget {
           Center(
             child: Text(
               'My Expense',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
           const SizedBox(height: 8),
@@ -46,7 +46,7 @@ class AboutScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 32),
-          
+
           Text(
             'About the App',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -60,7 +60,7 @@ class AboutScreen extends StatelessWidget {
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: 24),
-          
+
           Text(
             'Key Features',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -69,62 +69,64 @@ class AboutScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           _FeatureTile(
             icon: Icons.bar_chart,
             title: 'Visual Insights',
-            description: 'Track spending visually with daily, weekly, and monthly bar charts and category breakdowns.',
+            description:
+                'Track spending visually with daily, weekly, and monthly bar charts and category breakdowns.',
           ),
           _FeatureTile(
             icon: Icons.currency_exchange,
             title: 'Multi-Currency Support',
-            description: 'Log expenses in any currency and automatically convert totals using live exchange rates.',
+            description:
+                'Log expenses in any currency and automatically convert totals using live exchange rates.',
           ),
           _FeatureTile(
             icon: Icons.cloud_sync,
             title: 'Google Drive Cloud Backup',
-            description: 'Securely backup and restore your financial data using your Google account.',
+            description:
+                'Securely backup and restore your financial data using your Google account.',
           ),
           _FeatureTile(
             icon: Icons.security,
             title: 'PIN Lock Security',
-            description: 'Protect your sensitive financial data with a custom 4-digit PIN lock.',
+            description:
+                'Protect your sensitive financial data with a custom 4-digit PIN lock.',
           ),
           _FeatureTile(
             icon: Icons.account_balance,
             title: 'Multi-Account Tracking',
-            description: 'Separate expenses by source (Cash, Bank Account, or Credit Card).',
+            description:
+                'Separate expenses by source (Cash, Bank Account, or Credit Card).',
           ),
           _FeatureTile(
             icon: Icons.category,
             title: 'Custom Categories',
-            description: 'Create and manage your own personalized expense categories with custom icons and colors.',
+            description:
+                'Create and manage your own personalized expense categories with custom icons and colors.',
           ),
           _FeatureTile(
             icon: Icons.download,
             title: 'Export to CSV',
-            description: 'Easily export your transaction history to a spreadsheet for deeper analysis.',
+            description:
+                'Easily export your transaction history to a spreadsheet for deeper analysis.',
           ),
           _FeatureTile(
             icon: Icons.track_changes,
             title: 'Budget Planning',
-            description: 'Set a monthly budget to compare against your actual spending and stay on target.',
+            description:
+                'Set a monthly budget to compare against your actual spending and stay on target.',
           ),
           _FeatureTile(
             icon: Icons.dark_mode,
             title: 'Dark & Light Themes',
-            description: 'Seamlessly switch between beautiful dark and light themes or follow your system default.',
+            description:
+                'Seamlessly switch between beautiful dark and light themes or follow your system default.',
           ),
-          
+
           const SizedBox(height: 32),
-          Center(
-            child: Text(
-              'Made with ♥ in Flutter',
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ),
+
           const SizedBox(height: 32),
         ],
       ),
