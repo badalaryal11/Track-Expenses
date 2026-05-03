@@ -15,6 +15,8 @@ class GoogleDriveBackupService {
 
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     scopes: [drive.DriveApi.driveAppdataScope], // Use appData folder to hide backups from user's main drive
+    serverClientId: '690869062322-bfiudn6r5nq5bd3j64uah7sieqhbh6fi.apps.googleusercontent.com',
+    forceCodeForRefreshToken: true,
   );
 
   static const String _lastBackupKey = 'last_google_drive_backup';
@@ -39,17 +41,37 @@ class GoogleDriveBackupService {
 
   Future<bool> backupData() async {
     try {
-      final account = await _googleSignIn.signInSilently() ?? await signIn();
-      if (account == null) return false;
+      debugPrint("[Backup] Starting backup...");
+      
+      // Try silent sign-in first, then interactive
+      var account = await _googleSignIn.signInSilently();
+      if (account == null) {
+        debugPrint("[Backup] Silent sign-in failed, trying interactive...");
+        // Disconnect first to clear stale credentials
+        await _googleSignIn.disconnect().catchError((_) {});
+        account = await signIn();
+      }
+      if (account == null) {
+        debugPrint("[Backup] Sign-in failed — user cancelled or error.");
+        return false;
+      }
+      debugPrint("[Backup] Signed in as: ${account.email}");
 
       final httpClient = await _googleSignIn.authenticatedClient();
-      if (httpClient == null) return false;
+      if (httpClient == null) {
+        debugPrint("[Backup] Failed to get authenticated HTTP client.");
+        return false;
+      }
 
       final driveApi = drive.DriveApi(httpClient);
 
       // Create a JSON backup of the expenses
       final backupFile = await _createLocalBackupFile();
-      if (backupFile == null) return false;
+      if (backupFile == null) {
+        debugPrint("[Backup] Failed to create local backup file.");
+        return false;
+      }
+      debugPrint("[Backup] Local backup file created (${backupFile.lengthSync()} bytes).");
 
       // Check if backup already exists
       final fileList = await driveApi.files.list(
@@ -66,10 +88,10 @@ class GoogleDriveBackupService {
       final driveFile = drive.File()..name = 'expenses_backup.json';
 
       if (existingFileId != null) {
-        // Update existing file
+        debugPrint("[Backup] Updating existing file: $existingFileId");
         await driveApi.files.update(driveFile, existingFileId, uploadMedia: media);
       } else {
-        // Create new file
+        debugPrint("[Backup] Creating new backup file on Drive...");
         driveFile.parents = ['appDataFolder'];
         await driveApi.files.create(driveFile, uploadMedia: media);
       }
@@ -77,20 +99,36 @@ class GoogleDriveBackupService {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_lastBackupKey, DateTime.now().toIso8601String());
 
+      debugPrint("[Backup] Backup completed successfully!");
       return true;
-    } catch (e) {
-      debugPrint("Backup failed: $e");
+    } catch (e, stackTrace) {
+      debugPrint("[Backup] FAILED: $e");
+      debugPrint("[Backup] Stack trace: $stackTrace");
       return false;
     }
   }
 
   Future<bool> restoreData() async {
     try {
-      final account = await _googleSignIn.signInSilently() ?? await signIn();
-      if (account == null) return false;
+      debugPrint("[Restore] Starting restore...");
+      
+      var account = await _googleSignIn.signInSilently();
+      if (account == null) {
+        debugPrint("[Restore] Silent sign-in failed, trying interactive...");
+        await _googleSignIn.disconnect().catchError((_) {});
+        account = await signIn();
+      }
+      if (account == null) {
+        debugPrint("[Restore] Sign-in failed — user cancelled or error.");
+        return false;
+      }
+      debugPrint("[Restore] Signed in as: ${account.email}");
 
       final httpClient = await _googleSignIn.authenticatedClient();
-      if (httpClient == null) return false;
+      if (httpClient == null) {
+        debugPrint("[Restore] Failed to get authenticated HTTP client.");
+        return false;
+      }
 
       final driveApi = drive.DriveApi(httpClient);
 
@@ -100,11 +138,12 @@ class GoogleDriveBackupService {
       );
 
       if (fileList.files == null || fileList.files!.isEmpty) {
-        debugPrint("No backup found.");
+        debugPrint("[Restore] No backup found on Google Drive.");
         return false;
       }
 
       final fileId = fileList.files!.first.id!;
+      debugPrint("[Restore] Found backup file: $fileId");
       
       final drive.Media file = await driveApi.files.get(
         fileId,
@@ -117,11 +156,14 @@ class GoogleDriveBackupService {
       }).asFuture();
 
       final jsonString = utf8.decode(dataStore);
+      debugPrint("[Restore] Downloaded ${dataStore.length} bytes. Restoring...");
       await _restoreFromLocalJson(jsonString);
 
+      debugPrint("[Restore] Restore completed successfully!");
       return true;
-    } catch (e) {
-      debugPrint("Restore failed: $e");
+    } catch (e, stackTrace) {
+      debugPrint("[Restore] FAILED: $e");
+      debugPrint("[Restore] Stack trace: $stackTrace");
       return false;
     }
   }

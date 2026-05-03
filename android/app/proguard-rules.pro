@@ -33,3 +33,15 @@
 -dontwarn com.google.android.play.core.tasks.OnFailureListener
 -dontwarn com.google.android.play.core.tasks.OnSuccessListener
 -dontwarn com.google.android.play.core.tasks.Task
+
+# ── Google Sign-In & Google API Client (needed for Google Drive backup) ──
+-keep class com.google.android.gms.auth.** { *; }
+-keep class com.google.android.gms.common.** { *; }
+-keep class com.google.android.gms.tasks.** { *; }
+-keep class com.google.api.client.** { *; }
+-keep class com.google.api.services.drive.** { *; }
+-keep class com.google.http.client.** { *; }
+-dontwarn com.google.api.client.**
+-dontwarn com.google.common.**
+-dontwarn javax.annotation.**
+-dontwarn sun.misc.Unsafe

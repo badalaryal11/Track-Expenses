@@ -98,7 +98,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   CustomDropdownField(
-                    label: 'Base Currency',
+                    label: 'Default Currency',
                     value: AppConstants.currencies.contains(baseCurrency) ? baseCurrency : 'Other',
                     items: AppConstants.currencies,
                     onChanged: (value) async {
@@ -132,7 +132,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     await ExchangeRateService.instance.initialize(newCurrency);
                                     if (context.mounted) {
                                       ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text('Base currency set to $newCurrency and rates fetched!')),
+                                        SnackBar(content: Text('Default currency set to $newCurrency and rates fetched!')),
                                       );
                                     }
                                   }
@@ -147,11 +147,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         await ExchangeRateService.instance.initialize(value);
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Base currency updated and rates fetched!')),
+                            const SnackBar(content: Text('Default currency updated and rates fetched!')),
                           );
                         }
                       }
                     },
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'This is your default currency. All your dashboard totals and reports will be automatically converted and displayed in this currency!',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          fontStyle: FontStyle.italic,
+                        ),
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton.icon(
