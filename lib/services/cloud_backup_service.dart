@@ -15,8 +15,6 @@ class GoogleDriveBackupService {
 
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     scopes: [drive.DriveApi.driveAppdataScope], // Use appData folder to hide backups from user's main drive
-    serverClientId: '690869062322-bfiudn6r5nq5bd3j64uah7sieqhbh6fi.apps.googleusercontent.com',
-    forceCodeForRefreshToken: true,
   );
 
   static const String _lastBackupKey = 'last_google_drive_backup';
