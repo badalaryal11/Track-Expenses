@@ -57,8 +57,7 @@ class GoogleDriveBackupService {
 
       final httpClient = await _googleSignIn.authenticatedClient();
       if (httpClient == null) {
-        debugPrint("[Backup] Failed to get authenticated HTTP client.");
-        return false;
+        throw Exception("Failed to get authenticated HTTP client. Try signing out and in again.");
       }
 
       final driveApi = drive.DriveApi(httpClient);
@@ -66,8 +65,7 @@ class GoogleDriveBackupService {
       // Create a JSON backup of the expenses
       final backupFile = await _createLocalBackupFile();
       if (backupFile == null) {
-        debugPrint("[Backup] Failed to create local backup file.");
-        return false;
+        throw Exception("Failed to create local backup JSON file.");
       }
       debugPrint("[Backup] Local backup file created (${backupFile.lengthSync()} bytes).");
 
@@ -102,7 +100,7 @@ class GoogleDriveBackupService {
     } catch (e, stackTrace) {
       debugPrint("[Backup] FAILED: $e");
       debugPrint("[Backup] Stack trace: $stackTrace");
-      return false;
+      rethrow;
     }
   }
 

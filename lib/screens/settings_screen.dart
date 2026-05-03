@@ -19,16 +19,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _performBackup() async {
     setState(() => _isBackingUp = true);
-    final success = await GoogleDriveBackupService.instance.backupData();
-    setState(() => _isBackingUp = false);
+    try {
+      final success = await GoogleDriveBackupService.instance.backupData();
+      setState(() => _isBackingUp = false);
 
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(success ? 'Backup successful!' : 'Backup failed.'),
-          backgroundColor: success ? Colors.green : Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(success ? 'Backup successful!' : 'Backup failed. Check logs or permissions.'),
+            backgroundColor: success ? Colors.green : Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() => _isBackingUp = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Backup Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
