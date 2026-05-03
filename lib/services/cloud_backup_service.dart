@@ -14,16 +14,22 @@ class GoogleDriveBackupService {
   GoogleDriveBackupService._privateConstructor();
 
   final GoogleSignIn _googleSignIn = GoogleSignIn(
-    scopes: [drive.DriveApi.driveAppdataScope], // Use appData folder to hide backups from user's main drive
+    scopes: [drive.DriveApi.driveAppdataScope],
+    serverClientId: '690869062322-bfiudn6r5nq5bd3j64uah7sieqhbh6fi.apps.googleusercontent.com',
   );
 
   static const String _lastBackupKey = 'last_google_drive_backup';
 
   Future<GoogleSignInAccount?> signIn() async {
     try {
-      return await _googleSignIn.signIn();
+      final account = await _googleSignIn.signIn();
+      if (account == null) {
+        debugPrint("[Google Sign In] User cancelled sign-in.");
+      }
+      return account;
     } catch (error) {
-      debugPrint("Google Sign In Error: $error");
+      debugPrint("[Google Sign In] ERROR: $error");
+      // If you get "Developer Error", it's usually a SHA-1 mismatch or scope issue in Google Cloud Console.
       return null;
     }
   }
