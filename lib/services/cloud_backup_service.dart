@@ -50,7 +50,7 @@ class GoogleDriveBackupService {
       var account = await _googleSignIn.signInSilently();
       if (account == null) {
         debugPrint("[Backup] Silent sign-in failed, trying interactive...");
-        await _googleSignIn.disconnect().catchError((_) {});
+        await _googleSignIn.disconnect().catchError((_) => null);
         account = await signIn();
       }
       
@@ -109,7 +109,7 @@ class GoogleDriveBackupService {
       var account = await _googleSignIn.signInSilently();
       if (account == null) {
         debugPrint("[Restore] Silent sign-in failed, trying interactive...");
-        await _googleSignIn.disconnect().catchError((_) {});
+        await _googleSignIn.disconnect().catchError((_) => null);
         account = await signIn();
       }
       if (account == null) {
