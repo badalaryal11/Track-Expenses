@@ -47,35 +47,31 @@ class GoogleDriveBackupService {
     try {
       debugPrint("[Backup] Starting backup...");
       
-      // Try silent sign-in first, then interactive
       var account = await _googleSignIn.signInSilently();
       if (account == null) {
         debugPrint("[Backup] Silent sign-in failed, trying interactive...");
-        // Disconnect first to clear stale credentials
         await _googleSignIn.disconnect().catchError((_) {});
         account = await signIn();
       }
+      
       if (account == null) {
-        debugPrint("[Backup] Sign-in failed — user cancelled or error.");
-        return false;
+        throw Exception("Sign-in failed. Please ensure you are a test user in Google Cloud Console.");
       }
+      
       debugPrint("[Backup] Signed in as: ${account.email}");
 
       final httpClient = await _googleSignIn.authenticatedClient();
       if (httpClient == null) {
-        throw Exception("Failed to get authenticated HTTP client. Try signing out and in again.");
+        throw Exception("Failed to get authenticated HTTP client.");
       }
 
       final driveApi = drive.DriveApi(httpClient);
 
-      // Create a JSON backup of the expenses
       final backupFile = await _createLocalBackupFile();
       if (backupFile == null) {
-        throw Exception("Failed to create local backup JSON file.");
+        throw Exception("Failed to create local backup file.");
       }
-      debugPrint("[Backup] Local backup file created (${backupFile.lengthSync()} bytes).");
 
-      // Check if backup already exists
       final fileList = await driveApi.files.list(
         spaces: 'appDataFolder',
         q: "name = 'expenses_backup.json'",
@@ -90,10 +86,8 @@ class GoogleDriveBackupService {
       final driveFile = drive.File()..name = 'expenses_backup.json';
 
       if (existingFileId != null) {
-        debugPrint("[Backup] Updating existing file: $existingFileId");
         await driveApi.files.update(driveFile, existingFileId, uploadMedia: media);
       } else {
-        debugPrint("[Backup] Creating new backup file on Drive...");
         driveFile.parents = ['appDataFolder'];
         await driveApi.files.create(driveFile, uploadMedia: media);
       }
@@ -101,12 +95,10 @@ class GoogleDriveBackupService {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_lastBackupKey, DateTime.now().toIso8601String());
 
-      debugPrint("[Backup] Backup completed successfully!");
       return true;
-    } catch (e, stackTrace) {
+    } catch (e) {
       debugPrint("[Backup] FAILED: $e");
-      debugPrint("[Backup] Stack trace: $stackTrace");
-      rethrow;
+      rethrow; // Rethrow to show in UI
     }
   }
 

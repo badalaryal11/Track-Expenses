@@ -26,7 +26,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(success ? 'Backup successful!' : 'Backup failed. Check logs or permissions.'),
+            content: Text(success ? 'Backup successful!' : 'Backup failed. Please check your settings.'),
             backgroundColor: success ? Colors.green : Colors.red,
           ),
         );
@@ -34,10 +34,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
     } catch (e) {
       setState(() => _isBackingUp = false);
       if (mounted) {
+        String message = e.toString();
+        if (message.contains('Exception:')) {
+          message = message.split('Exception:').last.trim();
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Backup Error: $e'),
+            content: Text('Backup Error: $message'),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
           ),
         );
       }
