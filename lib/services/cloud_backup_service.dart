@@ -20,15 +20,21 @@ class GoogleDriveBackupService {
 
   static const String _lastBackupKey = 'last_google_drive_backup';
 
+  String? _lastError;
+  String? get lastError => _lastError;
+
   Future<GoogleSignInAccount?> signIn() async {
+    _lastError = null;
     try {
       final account = await _googleSignIn.signIn();
       if (account == null) {
         debugPrint("[Google Sign In] User cancelled sign-in.");
+        _lastError = "Sign-in was cancelled by the user.";
       }
       return account;
     } catch (error) {
       debugPrint("[Google Sign In] ERROR: $error");
+      _lastError = error.toString();
       // If you get "Developer Error", it's usually a SHA-1 mismatch or scope issue in Google Cloud Console.
       return null;
     }
@@ -55,7 +61,15 @@ class GoogleDriveBackupService {
       }
       
       if (account == null) {
-        throw Exception("Sign-in failed. Please ensure you are a test user in Google Cloud Console.");
+        String errorMsg = _lastError ?? "Unknown sign-in error.";
+        if (errorMsg.contains("7:")) {
+          errorMsg = "Network error. Please check your internet connection.";
+        } else if (errorMsg.contains("10:")) {
+          errorMsg = "Developer Error (10): This usually means the SHA-1 fingerprint is not registered in Google Cloud Console or there's a package name mismatch.";
+        } else if (errorMsg.contains("12500")) {
+          errorMsg = "Sign-in failed (12500): The user is not authorized or the Google Cloud project is not configured correctly.";
+        }
+        throw Exception("Sign-in failed: $errorMsg\n\nPlease ensure you are a test user in Google Cloud Console and your SHA-1 is correctly registered.");
       }
       
       debugPrint("[Backup] Signed in as: ${account.email}");
@@ -113,7 +127,12 @@ class GoogleDriveBackupService {
         account = await signIn();
       }
       if (account == null) {
-        debugPrint("[Restore] Sign-in failed — user cancelled or error.");
+        String errorMsg = _lastError ?? "Unknown sign-in error.";
+        if (errorMsg.contains("10:")) {
+          errorMsg = "Developer Error (10): SHA-1 mismatch or package name mismatch.";
+        }
+        debugPrint("[Restore] Sign-in failed: $errorMsg");
+        // We return false here instead of throwing because restore is often optional/manual
         return false;
       }
       debugPrint("[Restore] Signed in as: ${account.email}");
