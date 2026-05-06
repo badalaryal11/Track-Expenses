@@ -30,6 +30,14 @@
           }
         },
         {
+          "client_id": "690869062322-uljl0ffqhnpb3hpg1d0f8cd8u336goao.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.badalaryal.myexpense",
+            "certificate_hash": "20d1a47b8b6668bef25600fc0aa51f638453a33e"
+          }
+        },
+        {
           "client_id": "690869062322-bfiudn6r5nq5bd3j64uah7sieqhbh6fi.apps.googleusercontent.com",
           "client_type": 3
         }

@@ -15,7 +15,6 @@ class GoogleDriveBackupService {
 
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     scopes: [drive.DriveApi.driveAppdataScope],
-    serverClientId: '690869062322-bfiudn6r5nq5bd3j64uah7sieqhbh6fi.apps.googleusercontent.com',
   );
 
   static const String _lastBackupKey = 'last_google_drive_backup';
@@ -65,11 +64,11 @@ class GoogleDriveBackupService {
         if (errorMsg.contains("7:")) {
           errorMsg = "Network error. Please check your internet connection.";
         } else if (errorMsg.contains("10:")) {
-          errorMsg = "Developer Error (10): This usually means the SHA-1 fingerprint is not registered in Google Cloud Console or there's a package name mismatch.";
+          errorMsg = "Developer Error (10): SHA-1 fingerprint mismatch for this build signing key, or package name mismatch.";
         } else if (errorMsg.contains("12500")) {
           errorMsg = "Sign-in failed (12500): The user is not authorized or the Google Cloud project is not configured correctly.";
         }
-        throw Exception("Sign-in failed: $errorMsg\n\nPlease ensure you are a test user in Google Cloud Console and your SHA-1 is correctly registered.");
+        throw Exception("Sign-in failed: $errorMsg\n\nVerify package name `com.badalaryal.myexpense`, add current debug/release SHA-1 in Firebase/Google Cloud, then download updated google-services.json.");
       }
       
       debugPrint("[Backup] Signed in as: ${account.email}");
